@@ -8,12 +8,13 @@ import type {
   PaginatedResponse,
 } from "./schemas";
 import { TokenSchema } from "./schemas";
+import config from "./config";
 
 let instance: DuckDBInstance;
 let conn: DuckDBConnection;
 
 export async function initDB() {
-  instance = await DuckDBInstance.create("./db");
+  instance = await DuckDBInstance.create(config.database.path);
   conn = await instance.connect();
 
   // Create tables
@@ -219,6 +220,30 @@ export async function getToken(
   }
 
   return token;
+}
+
+export async function getTokensByConnection(
+  connection_id: string
+): Promise<PaginatedResponse<Token & { authorization_id: string }>> {
+  const result = await conn.run(
+    `SELECT authorization_id, access_token, expires_in, refresh_token, scope, token_type, id_token
+     FROM tokens WHERE connection_id = ?
+     ORDER BY created_at DESC`,
+    [connection_id]
+  );
+  const rows = await result.getRowObjects();
+  
+  return {
+    items: rows.map((row: any) => ({
+      authorization_id: row.authorization_id,
+      access_token: row.access_token,
+      expires_in: row.expires_in,
+      refresh_token: row.refresh_token,
+      scope: row.scope,
+      token_type: row.token_type,
+      id_token: row.id_token,
+    })),
+  };
 }
 
 async function refreshToken(

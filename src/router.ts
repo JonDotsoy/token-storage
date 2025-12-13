@@ -16,6 +16,7 @@ import {
   getConnections,
   saveToken,
   getToken,
+  getTokensByConnection,
   getStats,
 } from "./db";
 import config from "./config";
@@ -254,4 +255,20 @@ router.route("GET", "/authorizations/:authorization_id/token", async (req: Reque
   }
   
   return Response.json(token);
+});
+
+router.route("GET", "/connections/:connection_id/tokens", async (req: Request): Promise<Response> => {
+  const { connection_id } = params(req);
+  if (!connection_id) {
+    return new Response("Missing connection_id", { status: 400 });
+  }
+  
+  const connection = await getConnection(connection_id);
+  if (!connection) {
+    return new Response("Connection not found", { status: 404 });
+  }
+  
+  const tokens = await getTokensByConnection(connection_id);
+  
+  return Response.json(tokens);
 });

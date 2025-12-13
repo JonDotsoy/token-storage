@@ -12,14 +12,20 @@ interface CorsConfig {
     credentials: boolean;
 }
 
+interface DatabaseConfig {
+    path: string;
+}
+
 interface ConfigOptions {
     server?: Partial<ServerConfig>;
     cors?: Partial<CorsConfig>;
+    database?: Partial<DatabaseConfig>;
 }
 
 export class Config {
     public server: ServerConfig;
     public cors: CorsConfig;
+    public database: DatabaseConfig;
 
     constructor(options?: ConfigOptions) {
         const defaults = Config.defaultValues();
@@ -33,9 +39,12 @@ export class Config {
             allowedHeaders: options?.cors?.allowedHeaders ?? defaults.cors.allowedHeaders,
             credentials: options?.cors?.credentials ?? defaults.cors.credentials,
         };
+        this.database = {
+            path: options?.database?.path ?? defaults.database.path,
+        };
     }
 
-    static defaultValues(): { server: ServerConfig; cors: CorsConfig } {
+    static defaultValues(): { server: ServerConfig; cors: CorsConfig; database: DatabaseConfig } {
         return {
             server: {
                 port: 3000,
@@ -47,6 +56,9 @@ export class Config {
                 allowedHeaders: ["Content-Type", "Authorization"],
                 credentials: true,
             },
+            database: {
+                path: "./db",
+            },
         };
     }
 
@@ -54,6 +66,7 @@ export class Config {
         const port = pick(process.env).property("PORT")?.numeric()?.pipe(v => Number(v)).value ?? null;
         const hostname = pick(process.env).property("HOST")?.pipe(v => String(v)).value ?? null;
         const corsOrigin = pick(process.env).property("CORS_ORIGIN")?.pipe(v => String(v)).value ?? null;
+        const dbPath = pick(process.env).property("DB_PATH")?.pipe(v => String(v)).value ?? null;
         const defaultValues = Config.defaultValues();
 
         return new Config({
@@ -66,6 +79,9 @@ export class Config {
                 methods: options?.cors?.methods ?? defaultValues.cors.methods,
                 allowedHeaders: options?.cors?.allowedHeaders ?? defaultValues.cors.allowedHeaders,
                 credentials: options?.cors?.credentials ?? defaultValues.cors.credentials,
+            },
+            database: {
+                path: options?.database?.path ?? dbPath ?? defaultValues.database.path,
             },
         });
     }

@@ -28,5 +28,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
 ENV CORS_ORIGIN=*
+ENV DB_PATH=/data/db
+
+VOLUME ["/data"]
 
 CMD [ "bun", "run", "src/serve.ts" ]
