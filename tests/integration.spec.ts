@@ -1,5 +1,5 @@
 import { connect, serve, spawn, spawnSync } from "bun"
-import { describe, test, expect, beforeAll, afterAll } from "bun:test"
+import { describe, test, expect, afterEach, beforeEach } from "bun:test"
 import { Client } from "../src/client";
 
 const open = (...params: string[]) => spawnSync({ cmd: ['open', ...params], stdout: 'inherit', stderr: 'inherit' });
@@ -183,12 +183,12 @@ describe("test", () => {
 
     const db = new DB().path("./db");
 
-    beforeAll(async () => {
+    beforeEach(async () => {
         await db.clean()
         await server.start()
     })
 
-    afterAll(async () => {
+    afterEach(async () => {
         await server.close()
     })
 
@@ -196,6 +196,20 @@ describe("test", () => {
         const client = new Client().baseUrl(baseUrl.toString());
 
         await client.putOAuthClient("google", client_secret);
-        
+        await client.putConnection("conn", {
+            client_id: "google",
+            scope: ["profile"],
+        })
+        const authUrl = await client.getAuthUrl("conn", "http://localhost:4001/callback")
+
+        console.log("authUrl", authUrl.auth_url)
+        open(authUrl.auth_url);
+        const res = await new CallbackServer().port(4001).wait();
+        const code = new URL(res.url).searchParams.get("code");
+
+        const token = await client.exchangeCode("conn", code!, 'http://localhost:4001/callback');
+
+        console.log("token", token);
+
     }, { timeout: 30_000 })
 })

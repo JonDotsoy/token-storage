@@ -95,14 +95,17 @@ export class Client {
     if (redirectUrl) {
       url.searchParams.set("redirect_url", redirectUrl);
     }
-    return this.request("GET", url.pathname + url.search);
+    return this.request("GET", `${url}`);
   }
 
   // Authorizations
-  async exchangeCode(connectionId: string, code: string): Promise<Token & { authorization_id: string }> {
+  async exchangeCode(connectionId: string, code: string, redirect_uri?: string): Promise<Token & { authorization_id: string }> {
     const url = new URL(`/connections/${connectionId}/exchange`, this._baseUrl);
     url.searchParams.set("code", code);
-    return this.request("POST", url.pathname + url.search);
+    if (redirect_uri) {
+      url.searchParams.set("redirect_uri", redirect_uri);
+    }
+    return this.request("POST", `${url}`);
   }
 
   async getToken(authorizationId: string): Promise<Token> {

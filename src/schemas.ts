@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const OAuthClientInputSchema = z.object({
+  client_id: z.string(),
   project_id: z.string(),
   auth_uri: z.string(),
   token_uri: z.string(),
@@ -9,7 +10,7 @@ export const OAuthClientInputSchema = z.object({
 });
 
 export const OAuthClientSchema = OAuthClientInputSchema.extend({
-  client_id: z.string(),
+  oauth_client_id: z.string(),
 });
 
 export const ConnectionInputSchema = z.object({
@@ -24,9 +25,10 @@ export const ConnectionSchema = ConnectionInputSchema.extend({
 export const TokenSchema = z.object({
   access_token: z.string(),
   expires_in: z.number(),
-  token_type: z.string(),
-  scope: z.string(),
   refresh_token: z.string().optional(),
+  scope: z.string(),
+  token_type: z.string(),
+  id_token: z.string().optional(),
 });
 
 export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
