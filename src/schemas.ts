@@ -20,6 +20,7 @@ export const ConnectionInputSchema = z.object({
 
 export const ConnectionSchema = ConnectionInputSchema.extend({
   connection_id: z.string(),
+  created_at: z.string().optional(),
 });
 
 export const TokenSchema = z.object({

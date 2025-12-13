@@ -34,7 +34,8 @@ export async function initDB() {
     CREATE TABLE IF NOT EXISTS connections (
       connection_id VARCHAR PRIMARY KEY,
       client_id VARCHAR NOT NULL,
-      scope JSON NOT NULL
+      scope JSON NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -129,6 +130,7 @@ export async function getConnection(
     connection_id: row.connection_id,
     client_id: row.client_id,
     scope: JSON.parse(row.scope),
+    created_at: row.created_at,
   };
 }
 
@@ -139,13 +141,14 @@ export async function deleteConnection(connection_id: string): Promise<void> {
 }
 
 export async function getConnections(): Promise<PaginatedResponse<Connection>> {
-  const result = await conn.run(`SELECT * FROM connections`);
+  const result = await conn.run(`SELECT * FROM connections ORDER BY created_at DESC`);
   const rows = await result.getRowObjects();
   return {
     items: rows.map((row: any) => ({
       connection_id: row.connection_id,
       client_id: row.client_id,
       scope: JSON.parse(row.scope),
+      created_at: row.created_at,
     })),
   };
 }
