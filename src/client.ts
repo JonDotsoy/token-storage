@@ -99,7 +99,11 @@ export class Client {
   }
 
   // Authorizations
-  async exchangeCode(connectionId: string, code: string, redirect_uri?: string): Promise<Token & { authorization_id: string }> {
+  async exchangeCode(
+    connectionId: string,
+    code: string,
+    redirect_uri?: string
+  ): Promise<{ token: Token; authorization_id: string }> {
     const url = new URL(`/connections/${connectionId}/exchange`, this._baseUrl);
     url.searchParams.set("code", code);
     if (redirect_uri) {

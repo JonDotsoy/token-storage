@@ -187,7 +187,6 @@ router.route("POST", "/connections/:connection_id/exchange", async (req: Request
   }
   
   const tokenData = await tokenResponse.json();
-  console.log("tokenData",tokenData)
   const token = TokenSchema.parse(tokenData);
   
   // Save token to database
@@ -195,8 +194,8 @@ router.route("POST", "/connections/:connection_id/exchange", async (req: Request
   const result = await saveToken(authorization_id, connection_id, token);
   
   return Response.json({
-    ...token,
     authorization_id: result.authorization_id,
+    token,
   });
 });
 

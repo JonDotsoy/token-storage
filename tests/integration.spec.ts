@@ -207,9 +207,13 @@ describe("test", () => {
         const res = await new CallbackServer().port(4001).wait();
         const code = new URL(res.url).searchParams.get("code");
 
-        const token = await client.exchangeCode("conn", code!, 'http://localhost:4001/callback');
+        const { authorization_id , token} = await client.exchangeCode("conn", code!, 'http://localhost:4001/callback');
 
         console.log("token", token);
+
+        const token2 = await client.getToken(authorization_id);
+
+        console.log("token2", token2);
 
     }, { timeout: 30_000 })
 })

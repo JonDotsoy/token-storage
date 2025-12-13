@@ -7,6 +7,7 @@ import type {
   Token,
   PaginatedResponse,
 } from "./schemas";
+import { TokenSchema } from "./schemas";
 
 let instance: DuckDBInstance;
 let conn: DuckDBConnection;
@@ -181,7 +182,7 @@ export async function getToken(
     [authorization_id]
   );
   const rows = await result.getRowObjects();
-  return rows.length > 0 ? (rows[0] as any as Token) : null;
+  return rows.length > 0 ? TokenSchema.parse(rows[0]) : null;
 }
 
 export function getDB() {
