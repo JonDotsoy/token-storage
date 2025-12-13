@@ -6,8 +6,8 @@ import { initDB } from "./db"
 await initDB()
 
 const server = serve({
-    port: config.port,
-    hostname: config.hostname,
+    port: config.server.port,
+    hostname: config.server.hostname,
     fetch: router.fetch,
 })
 
