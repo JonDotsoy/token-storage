@@ -16,12 +16,18 @@ import {
   getConnections,
   saveToken,
   getToken,
+  getStats,
 } from "./db";
 
 export const router = new Router();
 
 router.route("ALL", "/health", async () => {
   return Response.json({ status: "ok" });
+});
+
+router.route("GET", "/stats", async () => {
+  const stats = await getStats();
+  return Response.json(stats);
 });
 
 // OAuth Clients

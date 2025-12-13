@@ -255,6 +255,27 @@ async function refreshToken(
   });
 }
 
+export async function getStats(): Promise<{
+  oauth_clients: number;
+  connections: number;
+  tokens: number;
+}> {
+  const clientsResult = await conn.run(`SELECT COUNT(*) as count FROM oauth_clients`);
+  const clientsRows = await clientsResult.getRowObjects();
+  
+  const connectionsResult = await conn.run(`SELECT COUNT(*) as count FROM connections`);
+  const connectionsRows = await connectionsResult.getRowObjects();
+  
+  const tokensResult = await conn.run(`SELECT COUNT(*) as count FROM tokens`);
+  const tokensRows = await tokensResult.getRowObjects();
+  
+  return {
+    oauth_clients: Number((clientsRows[0] as any).count),
+    connections: Number((connectionsRows[0] as any).count),
+    tokens: Number((tokensRows[0] as any).count),
+  };
+}
+
 export function getDB() {
   return { instance, conn };
 }
