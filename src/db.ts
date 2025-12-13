@@ -177,12 +177,82 @@ export async function getToken(
   authorization_id: string
 ): Promise<Token | null> {
   const result = await conn.run(
-    `SELECT access_token, expires_in, refresh_token, scope, token_type, id_token
+    `SELECT access_token, expires_in, refresh_token, scope, token_type, id_token, created_at, connection_id
      FROM tokens WHERE authorization_id = ?`,
     [authorization_id]
   );
   const rows = await result.getRowObjects();
-  return rows.length > 0 ? TokenSchema.parse(rows[0]) : null;
+  if (rows.length === 0) return null;
+
+  const row = rows[0] as any;
+  const token = TokenSchema.parse(row);
+  
+  // Calcular si el token está expirado
+  const createdAt = new Date(row.created_at).getTime();
+  const expiresAt = createdAt + token.expires_in * 1000;
+  const now = Date.now();
+  const isExpired = now >= expiresAt;
+
+  // Si está expirado y tiene refresh_token, refrescarlo
+  if (isExpired && token.refresh_token) {
+    const connection = await getConnection(row.connection_id);
+    if (!connection) return token; // Retornar token expirado si no hay conexión
+
+    const oauthClient = await getOAuthClient(connection.client_id);
+    if (!oauthClient) return token; // Retornar token expirado si no hay cliente
+
+    try {
+      const refreshedToken = await refreshToken(
+        oauthClient.token_uri,
+        oauthClient.client_id,
+        oauthClient.client_secret,
+        token.refresh_token
+      );
+
+      // Guardar el nuevo token
+      await saveToken(authorization_id, row.connection_id, refreshedToken);
+      return refreshedToken;
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      return token; // Retornar token expirado si falla el refresh
+    }
+  }
+
+  return token;
+}
+
+async function refreshToken(
+  tokenUri: string,
+  clientId: string,
+  clientSecret: string,
+  refreshToken: string
+): Promise<Token> {
+  const response = await fetch(tokenUri, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to refresh token: ${response.statusText}`);
+  }
+
+  const data = await response.json() as any;
+  return TokenSchema.parse({
+    access_token: data.access_token,
+    expires_in: data.expires_in,
+    refresh_token: data.refresh_token || refreshToken, // Mantener el refresh_token anterior si no viene uno nuevo
+    scope: data.scope,
+    token_type: data.token_type,
+    id_token: data.id_token,
+  });
 }
 
 export function getDB() {
