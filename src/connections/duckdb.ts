@@ -89,6 +89,7 @@ export class MigrationDuckDB {
                             name VARCHAR,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
+                        CHECKPOINT;
                     `)
             })
             .then(() => {
@@ -101,6 +102,7 @@ export class MigrationDuckDB {
                     },
                     putVersion: async (version: number, name?: string) => {
                         await connection.run("INSERT INTO migrations (version, name) VALUES (?, ?)", [version, name ?? null])
+                        await connection.run("CHECKPOINT")
                     },
                 })
                     .next({
@@ -237,6 +239,7 @@ export class MigrationDuckDB {
                             return {
                                 async run() {
                                     await connection.run(alter_table_connections_v2_sql)
+                                    await connection.run("CHECKPOINT")
                                 },
                                 utils: {
                                     async getConnections() {
