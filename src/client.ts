@@ -6,6 +6,7 @@ import type {
   Token,
   PaginatedResponse,
   AuthUrlResponse,
+  Stats,
 } from "./schemas";
 
 export interface ClientOptions {
@@ -114,5 +115,10 @@ export class Client {
 
   async getToken(authorizationId: string): Promise<Token> {
     return this.request("GET", `/authorizations/${authorizationId}/token`);
+  }
+
+  // Stats
+  async getStats(): Promise<Stats> {
+    return this.request("GET", "/stats");
   }
 }

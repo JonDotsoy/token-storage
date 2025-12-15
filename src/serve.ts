@@ -1,9 +1,6 @@
 import { serve } from "bun"
 import config from "./config"
 import { router } from "./router"
-import { initDB } from "./db"
-
-await initDB()
 
 const server = serve({
     port: config.server.port,

@@ -1,0 +1,13 @@
+services:
+
+  db:
+    image: duckdb/duckdb:latest
+
+  testing:
+    build:
+      context: .
+      target: testing
+    image: tokens:latest
+  app:
+    build: .
+    image: tokens:latest

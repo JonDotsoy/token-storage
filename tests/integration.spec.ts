@@ -174,7 +174,7 @@ class AuthServer {
     }
 }
 
-describe("test", () => {
+describe("Integración OAuth", () => {
     const baseUrl = new URL("http://localhost:3000");
 
     const server = new Service()
@@ -192,13 +192,14 @@ describe("test", () => {
         await server.close()
     })
 
-    test("test", async () => {
+    test("debería completar el flujo OAuth completo: crear cliente, obtener URL de autorización, intercambiar código y obtener token", async () => {
         const client = new Client().baseUrl(baseUrl.toString());
 
         await client.putOAuthClient("google", client_secret);
         await client.putConnection("conn", {
             client_id: "google",
             scope: ["profile"],
+            created_at: new Date(),
         })
         const authUrl = await client.getAuthUrl("conn", "http://localhost:4001/callback")
 

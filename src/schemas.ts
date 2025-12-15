@@ -16,11 +16,12 @@ export const OAuthClientSchema = OAuthClientInputSchema.extend({
 export const ConnectionInputSchema = z.object({
   client_id: z.string(),
   scope: z.array(z.string()),
+  created_at: z.date(),
 });
 
 export const ConnectionSchema = ConnectionInputSchema.extend({
   connection_id: z.string(),
-  created_at: z.string().optional(),
+  created_at: z.date(),
 });
 
 export const TokenSchema = z.object({
@@ -30,6 +31,7 @@ export const TokenSchema = z.object({
   scope: z.string(),
   token_type: z.string(),
   id_token: z.string().optional(),
+  created_at: z.date(),
 });
 
 export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
@@ -42,6 +44,12 @@ export const AuthUrlResponseSchema = z.object({
   auth_url: z.string(),
 });
 
+export const StatsSchema = z.object({
+  oauth_clients: z.number(),
+  connections: z.number(),
+  tokens: z.number(),
+});
+
 export type OAuthClientInput = z.infer<typeof OAuthClientInputSchema>;
 export type OAuthClient = z.infer<typeof OAuthClientSchema>;
 export type ConnectionInput = z.infer<typeof ConnectionInputSchema>;
@@ -52,3 +60,4 @@ export type PaginatedResponse<T> = {
   items: T[];
 };
 export type AuthUrlResponse = z.infer<typeof AuthUrlResponseSchema>;
+export type Stats = z.infer<typeof StatsSchema>;

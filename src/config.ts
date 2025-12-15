@@ -47,7 +47,7 @@ export class Config {
     static defaultValues(): { server: ServerConfig; cors: CorsConfig; database: DatabaseConfig } {
         return {
             server: {
-                port: 3000,
+                port: 5454,
                 hostname: "localhost",
             },
             cors: {
