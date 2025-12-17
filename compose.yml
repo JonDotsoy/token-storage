@@ -8,6 +8,11 @@ services:
       context: .
       target: testing
     image: tokens:latest
+
   app:
     build: .
     image: tokens:latest
+    ports:
+      - 5454:5454
+    volumes:
+      - ./db:/data

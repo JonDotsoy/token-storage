@@ -219,6 +219,23 @@ async function refreshToken(
   });
 }
 
+export async function getTokens(): Promise<PaginatedResponse<Token & { authorization_id: string; connection_id: string }>> {
+  const tokens = await migrated.getTokens();
+  return {
+    items: tokens.map((t): Token & { authorization_id: string; connection_id: string } => ({
+      access_token: t.access_token,
+      authorization_id: t.authorization_id,
+      connection_id: t.connection_id,
+      created_at: t.created_at,
+      expires_in: t.expires_in,
+      scope: t.scope,
+      token_type: t.token_type,
+      id_token: t.id_token ?? undefined,
+      refresh_token: t.refresh_token ?? undefined,
+    }))
+  }
+}
+
 export async function getStats(): Promise<{
   oauth_clients: number;
   connections: number;

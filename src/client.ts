@@ -89,14 +89,11 @@ export class Client {
     connectionId: string,
     redirectUrl?: string
   ): Promise<AuthUrlResponse> {
-    const url = new URL(
-      `/connections/${connectionId}/auth_url`,
-      this._baseUrl
-    );
+    let path = `/connections/${connectionId}/auth_url`;
     if (redirectUrl) {
-      url.searchParams.set("redirect_url", redirectUrl);
+      path += `?redirect_url=${encodeURIComponent(redirectUrl)}`;
     }
-    return this.request("GET", `${url}`);
+    return this.request("GET", path);
   }
 
   // Authorizations
@@ -105,16 +102,23 @@ export class Client {
     code: string,
     redirect_uri?: string
   ): Promise<{ token: Token; authorization_id: string }> {
-    const url = new URL(`/connections/${connectionId}/exchange`, this._baseUrl);
-    url.searchParams.set("code", code);
+    let path = `/connections/${connectionId}/exchange?code=${encodeURIComponent(code)}`;
     if (redirect_uri) {
-      url.searchParams.set("redirect_uri", redirect_uri);
+      path += `&redirect_uri=${encodeURIComponent(redirect_uri)}`;
     }
-    return this.request("POST", `${url}`);
+    return this.request("POST", path);
   }
 
   async getToken(authorizationId: string): Promise<Token> {
     return this.request("GET", `/authorizations/${authorizationId}/token`);
+  }
+
+  async getTokens(): Promise<PaginatedResponse<Token & { authorization_id: string; connection_id: string }>> {
+    return this.request("GET", "/tokens");
+  }
+
+  async getTokensByConnection(connectionId: string): Promise<PaginatedResponse<Token & { authorization_id: string }>> {
+    return this.request("GET", `/connections/${connectionId}/tokens`);
   }
 
   // Stats

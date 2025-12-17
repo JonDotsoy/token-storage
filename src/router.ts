@@ -16,6 +16,7 @@ import {
   getConnections,
   saveToken,
   getToken,
+  getTokens,
   getTokensByConnection,
   getStats,
 } from "./db";
@@ -271,4 +272,8 @@ router.route("GET", "/connections/:connection_id/tokens", async (req: Request): 
   const tokens = await getTokensByConnection(connection_id);
   
   return Response.json(tokens);
+});
+
+router.route("GET", "/tokens", async () => {
+  return Response.json(await getTokens());
 });

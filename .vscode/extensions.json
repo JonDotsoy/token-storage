@@ -1,5 +1,8 @@
 {
     "recommendations": [
-        "oven.bun-vscode"
+        "oven.bun-vscode",
+        "mtxr.sqltools",
+        "Evidence.sqltools-duckdb-driver",
+        "ms-azuretools.vscode-containers",
     ]
 }

@@ -1,5 +1,7 @@
 import { pick } from "@jondotsoy/utils-js/pick";
 
+const env = (name: string) => pick(process.env).property(name);
+
 interface ServerConfig {
     port: number;
     hostname: string;
@@ -63,10 +65,10 @@ export class Config {
     }
 
     static fromEnvironment(options?: ConfigOptions): Config {
-        const port = pick(process.env).property("PORT")?.numeric()?.pipe(v => Number(v)).value ?? null;
-        const hostname = pick(process.env).property("HOST")?.pipe(v => String(v)).value ?? null;
-        const corsOrigin = pick(process.env).property("CORS_ORIGIN")?.pipe(v => String(v)).value ?? null;
-        const dbPath = pick(process.env).property("DB_PATH")?.pipe(v => String(v)).value ?? null;
+        const port = env("PORT")?.numeric()?.pipe(v => Number(v)).value ?? null;
+        const hostname = env("HOST")?.string()?.value ?? null;
+        const corsOrigin = env("CORS_ORIGIN")?.string()?.value ?? null;
+        const dbPath = env("DB_PATH")?.string()?.value ?? null;
         const defaultValues = Config.defaultValues();
 
         return new Config({

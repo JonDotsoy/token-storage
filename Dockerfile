@@ -33,13 +33,14 @@ FROM base
 COPY --from=install /temp/prod /usr/src/app
 COPY src /usr/src/app/src
 
-EXPOSE 3000
+EXPOSE 5454
 
 ENV NODE_ENV=production
 ENV PORT=5454
 ENV HOST=0.0.0.0
 ENV CORS_ORIGIN=*
 ENV DB_PATH=/data/db.duckdb
+ENV CORS_ORIGIN=*
 
 # RUN mkdir /data
 VOLUME ["/data"]
