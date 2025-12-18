@@ -9,6 +9,12 @@ services:
       target: testing
     image: tokens:latest
 
+  build:
+    build:
+      context: .
+      target: build
+    image: tokens:latest
+
   app:
     build: .
     image: tokens:latest

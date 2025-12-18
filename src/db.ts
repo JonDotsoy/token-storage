@@ -1,4 +1,4 @@
-import { DuckDBConnection, DuckDBInstance } from "@duckdb/node-api";
+import { DuckDBInstance } from "@duckdb/node-api";
 import type {
   OAuthClient,
   OAuthClientInput,
@@ -6,10 +6,10 @@ import type {
   ConnectionInput,
   Token,
   PaginatedResponse,
-} from "./schemas";
-import { TokenSchema } from "./schemas";
-import config from "./config";
-import { MigrationDuckDB } from "./connections/duckdb";
+} from "./schemas.js";
+import { TokenSchema } from "./schemas.js";
+import config from "./config.js";
+import { MigrationDuckDB } from "./connections/duckdb.js";
 
 async function initDB() {
   const instance = await DuckDBInstance.create(config.database.path);

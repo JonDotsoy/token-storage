@@ -1,10 +1,9 @@
 import { Router, params } from "artur";
-import { z } from "zod";
 import {
   OAuthClientInputSchema,
   ConnectionInputSchema,
   TokenSchema,
-} from "./schemas";
+} from "./schemas.js";
 import {
   putOAuthClient,
   getOAuthClient,
@@ -19,8 +18,8 @@ import {
   getTokens,
   getTokensByConnection,
   getStats,
-} from "./db";
-import config from "./config";
+} from "./db.js";
+import config from "./config.js";
 
 export const router = new Router({
   middlewares: [

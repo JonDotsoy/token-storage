@@ -7,7 +7,7 @@ import type {
   PaginatedResponse,
   AuthUrlResponse,
   Stats,
-} from "./schemas";
+} from "./schemas.js";
 
 export interface ClientOptions {
   baseUrl?: string;

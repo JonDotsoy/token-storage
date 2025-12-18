@@ -1,6 +1,6 @@
 import { serve } from "bun"
-import config from "./config"
-import { router } from "./router"
+import config from "./config.js"
+import { router } from "./router.js"
 
 const server = serve({
     port: config.server.port,

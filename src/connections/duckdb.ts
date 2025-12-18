@@ -1,5 +1,5 @@
 import type { DuckDBConnection } from "@duckdb/node-api";
-import { Migration } from "../utils/migration";
+import { Migration } from "../utils/migration.js";
 
 const create_table_oauth_clients_sql = `
     CREATE TABLE IF NOT EXISTS oauth_clients (

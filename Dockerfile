@@ -24,9 +24,14 @@ COPY src /usr/src/app/src
 
 ENV NODE_ENV=test
 
-ARG CACHEBUST=1
 RUN bun test
-RUN bun test
+
+# Build
+FROM base AS build
+COPY --from=install /temp/dev /usr/src/app
+COPY src /usr/src/app/src
+
+RUN bun build /usr/src/app/src/serve.ts
 
 # RELEASE
 FROM base
