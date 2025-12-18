@@ -19,9 +19,11 @@ bun run src/serve.ts
 ### Health & Stats
 
 #### `GET /health`
+
 Verifica el estado del servicio.
 
 **Response:**
+
 ```json
 {
   "status": "ok"
@@ -29,9 +31,11 @@ Verifica el estado del servicio.
 ```
 
 #### `GET /stats`
+
 Obtiene estadísticas del servicio (clientes OAuth, conexiones y autorizaciones).
 
 **Response:**
+
 ```json
 {
   "oauth_clients": 5,
@@ -45,9 +49,11 @@ Obtiene estadísticas del servicio (clientes OAuth, conexiones y autorizaciones)
 ### OAuth Clients
 
 #### `PUT /oauth_clients/:client_id`
+
 Crea o actualiza un cliente OAuth.
 
 **Body:**
+
 ```json
 {
   "client_id": "string",
@@ -60,6 +66,7 @@ Crea o actualiza un cliente OAuth.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -67,9 +74,11 @@ Crea o actualiza un cliente OAuth.
 ```
 
 #### `GET /oauth_clients/:client_id`
+
 Obtiene un cliente OAuth por ID.
 
 **Response:**
+
 ```json
 {
   "oauth_client_id": "string",
@@ -83,9 +92,11 @@ Obtiene un cliente OAuth por ID.
 ```
 
 #### `DELETE /oauth_clients/:client_id`
+
 Elimina un cliente OAuth.
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -93,9 +104,11 @@ Elimina un cliente OAuth.
 ```
 
 #### `GET /oauth_clients`
+
 Lista todos los clientes OAuth.
 
 **Response:**
+
 ```json
 [
   {
@@ -115,9 +128,11 @@ Lista todos los clientes OAuth.
 ### Connections
 
 #### `PUT /connections/:connection_id`
+
 Crea o actualiza una conexión.
 
 **Body:**
+
 ```json
 {
   "client_id": "string",
@@ -126,6 +141,7 @@ Crea o actualiza una conexión.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -133,9 +149,11 @@ Crea o actualiza una conexión.
 ```
 
 #### `GET /connections/:connection_id`
+
 Obtiene una conexión por ID.
 
 **Response:**
+
 ```json
 {
   "connection_id": "string",
@@ -145,9 +163,11 @@ Obtiene una conexión por ID.
 ```
 
 #### `DELETE /connections/:connection_id`
+
 Elimina una conexión.
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -155,9 +175,11 @@ Elimina una conexión.
 ```
 
 #### `GET /connections`
+
 Lista todas las conexiones.
 
 **Response:**
+
 ```json
 [
   {
@@ -173,12 +195,15 @@ Lista todas las conexiones.
 ### Authorization Flow
 
 #### `GET /connections/:connection_id/auth_url`
+
 Genera la URL de autorización OAuth.
 
 **Query Parameters:**
+
 - `redirect_url` (opcional): URL de redirección después de la autorización
 
 **Response:**
+
 ```json
 {
   "auth_url": "https://accounts.google.com/o/oauth2/auth?client_id=...&redirect_uri=...&response_type=code&scope=...&access_type=offline&state=..."
@@ -186,13 +211,16 @@ Genera la URL de autorización OAuth.
 ```
 
 #### `POST /connections/:connection_id/exchange`
+
 Intercambia el código de autorización por un token de acceso.
 
 **Query Parameters:**
+
 - `code` (requerido): Código de autorización recibido del proveedor OAuth
 - `redirect_uri` (requerido): URI de redirección usado en la autorización
 
 **Response:**
+
 ```json
 {
   "authorization_id": "uuid",
@@ -208,9 +236,11 @@ Intercambia el código de autorización por un token de acceso.
 ```
 
 #### `GET /authorizations/:authorization_id/token`
+
 Obtiene un token de autorización guardado.
 
 **Response:**
+
 ```json
 {
   "access_token": "string",
@@ -223,9 +253,11 @@ Obtiene un token de autorización guardado.
 ```
 
 #### `GET /connections/:connection_id/tokens`
+
 Lista todos los tokens asociados a una conexión.
 
 **Response:**
+
 ```json
 {
   "items": [

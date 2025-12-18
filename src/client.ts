@@ -28,7 +28,7 @@ export class Client {
   private async request<T>(
     method: string,
     path: string,
-    body?: unknown
+    body?: unknown,
   ): Promise<T> {
     const url = new URL(path, this._baseUrl);
     const response = await fetch(url.toString(), {
@@ -47,7 +47,7 @@ export class Client {
   // OAuth Clients
   async putOAuthClient(
     clientId: string,
-    data: OAuthClientInput
+    data: OAuthClientInput,
   ): Promise<void> {
     await this.request("PUT", `/oauth_clients/${clientId}`, data);
   }
@@ -67,7 +67,7 @@ export class Client {
   // Connections
   async putConnection(
     connectionId: string,
-    data: ConnectionInput
+    data: ConnectionInput,
   ): Promise<void> {
     await this.request("PUT", `/connections/${connectionId}`, data);
   }
@@ -87,7 +87,7 @@ export class Client {
   // Auth URL
   async getAuthUrl(
     connectionId: string,
-    redirectUrl?: string
+    redirectUrl?: string,
   ): Promise<AuthUrlResponse> {
     let path = `/connections/${connectionId}/auth_url`;
     if (redirectUrl) {
@@ -100,7 +100,7 @@ export class Client {
   async exchangeCode(
     connectionId: string,
     code: string,
-    redirect_uri?: string
+    redirect_uri?: string,
   ): Promise<{ token: Token; authorization_id: string }> {
     let path = `/connections/${connectionId}/exchange?code=${encodeURIComponent(code)}`;
     if (redirect_uri) {
@@ -113,11 +113,17 @@ export class Client {
     return this.request("GET", `/authorizations/${authorizationId}/token`);
   }
 
-  async getTokens(): Promise<PaginatedResponse<Token & { authorization_id: string; connection_id: string }>> {
+  async getTokens(): Promise<
+    PaginatedResponse<
+      Token & { authorization_id: string; connection_id: string }
+    >
+  > {
     return this.request("GET", "/tokens");
   }
 
-  async getTokensByConnection(connectionId: string): Promise<PaginatedResponse<Token & { authorization_id: string }>> {
+  async getTokensByConnection(
+    connectionId: string,
+  ): Promise<PaginatedResponse<Token & { authorization_id: string }>> {
     return this.request("GET", `/connections/${connectionId}/tokens`);
   }
 

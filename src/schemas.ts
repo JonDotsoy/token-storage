@@ -43,7 +43,9 @@ export const TokenSchema = z.object({
     .default(new Date()),
 });
 
-export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
+  itemSchema: T,
+) =>
   z.object({
     next_cursor: z.string().optional(),
     items: z.array(itemSchema),

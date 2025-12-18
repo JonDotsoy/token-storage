@@ -15,5 +15,9 @@
     "@jondotsoy/utils-js": "1.4.1",
     "artur": "1.11.1",
     "zod": "4.1.13"
+  },
+  "scripts": {
+    "lint": "prettier --check .",
+    "fmt": "prettier --write ."
   }
 }

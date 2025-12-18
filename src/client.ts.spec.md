@@ -118,43 +118,43 @@ const token = await client.getToken("{{authorization_id}}");
 
 ```ts
 interface OAuthClient {
-    client_id: string;
-    project_id: string;
-    auth_uri: string;
-    token_uri: string;
-    auth_provider_x509_cert_url: string;
-    client_secret: string;
+  client_id: string;
+  project_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_secret: string;
 }
 
 interface OAuthClientInput {
-    project_id: string;
-    auth_uri: string;
-    token_uri: string;
-    auth_provider_x509_cert_url: string;
-    client_secret: string;
+  project_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_secret: string;
 }
 
 interface Connection {
-    connection_id: string;
-    client_id: string;
-    scope: string[];
+  connection_id: string;
+  client_id: string;
+  scope: string[];
 }
 
 interface ConnectionInput {
-    client_id: string;
-    scope: string[];
+  client_id: string;
+  scope: string[];
 }
 
 interface Token {
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-    scope: string;
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
 }
 
 interface PaginatedResponse<T> {
-    next_cursor?: string;
-    items: T[];
+  next_cursor?: string;
+  items: T[];
 }
 ```
 
@@ -171,4 +171,3 @@ interface PaginatedResponse<T> {
 - GET /connections/{{connection_id}}/auth_url -> { auth_url: string }
 - POST /authorizations/{{authorization_id}}/exchange?code={{code}} -> Token
 - GET /authorizations/{{authorization_id}}/token -> Token
-
