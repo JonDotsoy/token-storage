@@ -307,14 +307,9 @@ export class MigrationPostgresQL {
                   );
                 },
                 async countDocumentsCredentials() {
-                  console.log(
-                    `q:`,
-                    "SELECT COUNT(*) as count FROM credentials",
-                  );
                   const result = await connection.query(
                     "SELECT COUNT(*) as count FROM credentials",
                   );
-                  console.log("result:", result);
                   return Number(result.rows[0]?.count ?? 0);
                 },
               },
