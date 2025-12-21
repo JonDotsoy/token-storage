@@ -94,6 +94,9 @@ export class TokenStorage implements StorageInstance {
     connection_id: string,
     redirect_uri: string,
   ): Promise<string> {
+    if (this.#options.db.getAuthURL)
+      return await this.#options.db.getAuthURL(connection_id, redirect_uri);
+
     const connection = await this.getConnection(connection_id);
     if (!connection) {
       throw new Error("Connection not found");
@@ -116,6 +119,13 @@ export class TokenStorage implements StorageInstance {
     redirect_uri: string,
     code: string,
   ) {
+    if (this.#options.db.exchangeCode)
+      return await this.#options.db.exchangeCode(
+        connection_id,
+        redirect_uri,
+        code,
+      );
+
     const connection = await this.getConnection(connection_id);
     if (!connection) {
       throw new Error("Connection not found");
@@ -173,6 +183,9 @@ export class TokenStorage implements StorageInstance {
   }
 
   async getToken(credential_id: string): Promise<Credential["token"]> {
+    if (this.#options.db.getToken)
+      return await this.#options.db.getToken(credential_id);
+
     const credential = await this.getCredential(credential_id);
     if (!credential) {
       throw new Error("Credential not found");
