@@ -1,98 +1,21 @@
-import { connect, serve, spawn, spawnSync } from "bun";
-import { describe, test, expect, afterEach, beforeEach } from "bun:test";
+import { connect } from "bun";
+import {
+  describe,
+  test,
+  expect,
+  afterEach,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "bun:test";
 import { Client } from "../src/client";
-
-const open = (...params: string[]) =>
-  spawnSync({ cmd: ["open", ...params], stdout: "inherit", stderr: "inherit" });
-
-class Service {
-  #healthCheck?: string;
-  #cmd?: string[];
-  #childprocess?: Bun.Subprocess<"ignore", "inherit", "inherit">;
-
-  cmd(args: string[]) {
-    this.#cmd = args;
-    return this;
-  }
-
-  healthCheck(url: string) {
-    this.#healthCheck = url;
-    return this;
-  }
-
-  async close() {
-    if (!this.#childprocess) throw new Error("No child process");
-    this.#childprocess.kill("SIGQUIT");
-    await this.#childprocess.exited;
-  }
-
-  async start() {
-    if (!this.#cmd) throw new Error("No command provided");
-    this.#childprocess = await spawn({
-      cmd: this.#cmd,
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    if (this.#healthCheck) {
-      while (true) {
-        try {
-          const response = await fetch(this.#healthCheck);
-          if (response.status === 200) {
-            break;
-          }
-        } catch {
-          await new Promise((resolve) => setTimeout(resolve, 90));
-        }
-      }
-    }
-  }
-}
-
-class DB {
-  #path?: string;
-
-  path(path: string) {
-    this.#path = path;
-    return this;
-  }
-
-  clean() {
-    if (!this.#path) throw new Error("No path provided");
-    Bun.spawn(["rm", "-rf", this.#path]);
-  }
-}
-
-class CallbackServer {
-  #port?: number;
-
-  port(port: number) {
-    this.#port = port;
-    return this;
-  }
-
-  async wait() {
-    if (!this.#port) throw new Error("No port provided");
-    const callback = Promise.withResolvers<{
-      url: string;
-      headers: any;
-      body: any;
-    }>();
-    const server = serve({
-      port: this.#port,
-      async fetch(req) {
-        callback.resolve({
-          url: req.url,
-          headers: Object.fromEntries(req.headers.entries()),
-          body: await req.text(),
-        });
-        return new Response("OK");
-      },
-    });
-    const value = await callback.promise;
-    server.stop();
-    return value;
-  }
-}
+import { TokenStorage } from "../src/token-storage/token-storage";
+import { Service } from "./Service";
+import { DB } from "./DB";
+import { CallbackServer } from "./CallbackServer";
+import { ms } from "./ms";
+import { openUrl } from "./openUrl";
+import { OAuthDummyServer } from "./OAuthDummyServer";
 
 const client_secret = {
   client_id:
@@ -105,81 +28,60 @@ const client_secret = {
   redirect_uris: ["http://localhost"],
 };
 
-class AuthClient {
-  #client_id?: string;
-  #baseUrl?: string = "http://localhost/";
+describe("t", () => {
+  const d = new OAuthDummyServer().port(4080);
 
-  clientId(client_id: string) {
-    this.#client_id = client_id;
-    return this;
-  }
+  beforeAll(async () => {
+    await d.start();
+  });
 
-  baseUrl(baseUrl: string) {
-    this.#baseUrl = baseUrl;
-    return this;
-  }
+  afterAll(async () => {
+    await d.close();
+  });
 
-  async authorize_url(redirect_uri: string) {
-    if (!this.#client_id) throw new Error("No client_id provided");
-    const u = new URL(`./authorize/${this.#client_id}`, this.#baseUrl);
-    u.searchParams.set("redirect_uri", redirect_uri);
-    const res = await fetch(u);
-    if (res.status !== 200)
-      throw new Error(`Error getting authorize url: ${await res.text()}`);
-    return res.json();
-  }
-}
+  test(
+    "test1",
+    async () => {
+      const tokenStore = new TokenStorage();
 
-class AuthServer {
-  #port?: number;
-  #exchanges = new Map<string, string>();
-  server?: Bun.Server<undefined>;
+      await tokenStore.putOAuthClient("google", d.info());
+      await tokenStore.putConnection("conn", {
+        oauth_client_id: "google",
+        scope: ["profile"],
+        created_at: new Date(),
+      });
+      const urlLogin = await tokenStore.getAuthURL(
+        "conn",
+        "http://localhost:4002",
+      );
+      openUrl(urlLogin);
+      const res = await new CallbackServer().port(4002).wait();
+      const code = new URL(res.url).searchParams.get("code")!;
+      const { credential_id } = await tokenStore.exchangeCode(
+        "conn",
+        "http://localhost:4002",
+        code,
+      );
+      const token = await tokenStore.getToken(credential_id);
+      console.log("token", token);
+      // const credential = await tokenStore.getCredential(credential_id);
+      // await tokenStore.putCredential(credential_id, {
+      //   ...credential!,
+      //   token: {
+      //     ...credential!.token,
+      //     expires_in: -1, // force expiration
+      //   }
+      // });
 
-  port(port: number) {
-    this.#port = port;
-    return this;
-  }
+      const token2 = await tokenStore.getToken(credential_id);
+      console.log("token", token2);
+      debugger;
+    },
+    { timeout: ms.minutes(30) },
+  );
+});
 
-  setExchange(code: string, token: string) {
-    this.#exchanges.set(code, token);
-    return this;
-  }
-
-  async close() {
-    if (!this.server) throw new Error("No server");
-    this.server.stop();
-  }
-
-  async start() {
-    if (!this.#port) throw new Error("No port provided");
-    this.server = serve({
-      port: this.#port,
-      routes: {
-        "/health": () => new Response("ok"),
-        "/exchange": (req) => {
-          const url = new URL(req.url);
-          const code = url.searchParams.get("code");
-          if (!code) return new Response("Missing code", { status: 400 });
-          const token = this.#exchanges.get(code);
-          if (!token) return new Response("Invalid code", { status: 400 });
-          return Response.json({ token });
-        },
-      },
-    });
-    while (true) {
-      try {
-        const response = await fetch(new URL(`/health`, this.server.url));
-        if (response.status === 200) {
-          break;
-        }
-      } catch {
-        await new Promise((resolve) => setTimeout(resolve, 90));
-      }
-    }
-  }
-}
-
-describe("Integración OAuth", () => {
+describe.skip("Integración OAuth", () => {
   const baseUrl = new URL("http://localhost:3000");
 
   const server = new Service()
@@ -214,7 +116,7 @@ describe("Integración OAuth", () => {
       );
 
       console.log("authUrl", authUrl.auth_url);
-      open(authUrl.auth_url);
+      openUrl(authUrl.auth_url);
       const res = await new CallbackServer().port(4001).wait();
       const code = new URL(res.url).searchParams.get("code");
 

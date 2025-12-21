@@ -1,4 +1,4 @@
-import { Router, params } from "artur";
+import { Router, params, cors } from "artur";
 import {
   OAuthClientInputSchema,
   ConnectionInputSchema,
@@ -22,50 +22,7 @@ import {
 import config from "./config.js";
 
 export const router = new Router({
-  middlewares: [
-    (next) => async (req) => {
-      const origin = req.headers.get("origin");
-      const response = await next(req);
-
-      const headers = new Headers(response.headers);
-
-      // Verificar si el origen está permitido
-      const allowedOrigins = Array.isArray(config.cors.origin)
-        ? config.cors.origin
-        : [config.cors.origin];
-
-      if (
-        config.cors.origin === "*" ||
-        (origin && allowedOrigins.includes(origin))
-      ) {
-        headers.set("Access-Control-Allow-Origin", origin || "*");
-      }
-
-      headers.set(
-        "Access-Control-Allow-Methods",
-        config.cors.methods.join(", "),
-      );
-      headers.set(
-        "Access-Control-Allow-Headers",
-        config.cors.allowedHeaders.join(", "),
-      );
-
-      if (config.cors.credentials) {
-        headers.set("Access-Control-Allow-Credentials", "true");
-      }
-
-      // Manejar preflight requests
-      if (req.method === "OPTIONS") {
-        return new Response(null, { status: 204, headers });
-      }
-
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-      });
-    },
-  ],
+  middlewares: [cors()],
 });
 
 router.route("ALL", "/health", async () => {

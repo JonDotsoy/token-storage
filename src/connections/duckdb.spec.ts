@@ -3,12 +3,12 @@ import { MigrationDuckDB } from "./duckdb";
 import { DuckDBInstance } from "@duckdb/node-api";
 
 describe("MigrationDuckDB", () => {
-  test("debería crear una instancia de MigrationDuckDB correctamente", async () => {
+  test("should create a MigrationDuckDB instance correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
     await new MigrationDuckDB(conn).migrated;
   });
-  test("debería guardar y recuperar un cliente OAuth correctamente", async () => {
+  test("should save and retrieve an OAuth client correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
     const migrated = await new MigrationDuckDB(conn).migrated;
@@ -37,7 +37,7 @@ describe("MigrationDuckDB", () => {
       },
     ]);
   });
-  test("test1", async () => {
+  test("should save and retrieve a connection correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
     const migrated = await new MigrationDuckDB(conn).migrated;

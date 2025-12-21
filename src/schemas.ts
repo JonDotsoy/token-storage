@@ -7,6 +7,7 @@ export const OAuthClientInputSchema = z.object({
   token_uri: z.string(),
   auth_provider_x509_cert_url: z.string(),
   client_secret: z.string(),
+  created_at: z.iso.datetime(),
 });
 
 export const OAuthClientSchema = OAuthClientInputSchema.extend({
@@ -14,33 +15,43 @@ export const OAuthClientSchema = OAuthClientInputSchema.extend({
 });
 
 export const ConnectionInputSchema = z.object({
-  client_id: z.string(),
+  oauth_client_id: z.string(),
   scope: z.array(z.string()),
-  created_at: z
-    .union([z.date(), z.string().transform((val) => new Date(val))])
-    .optional()
-    .default(new Date()),
+  created_at: z.iso.datetime(),
 });
 
 export const ConnectionSchema = ConnectionInputSchema.extend({
   connection_id: z.string(),
-  created_at: z
-    .union([z.date(), z.string().transform((val) => new Date(val))])
-    .optional()
-    .default(new Date()),
 });
 
 export const TokenSchema = z.object({
-  access_token: z.string(),
-  expires_in: z.number(),
-  refresh_token: z.string().optional(),
-  scope: z.string(),
-  token_type: z.string(),
-  id_token: z.string().optional(),
-  created_at: z
-    .union([z.date(), z.string().transform((val) => new Date(val))])
+  access_token: z
+    .string()
+    .describe("OAuth 2.0 access token used to authenticate API requests"),
+  expires_in: z
+    .number()
+    .describe("Number of seconds until the access token expires"),
+  refresh_token: z
+    .string()
     .optional()
-    .default(new Date()),
+    .describe("OAuth 2.0 refresh token used to obtain new access tokens"),
+  scope: z.string().describe("Space-delimited list of granted OAuth scopes"),
+  token_type: z.string().describe("Type of token issued, typically 'Bearer'"),
+  id_token: z
+    .string()
+    .optional()
+    .describe("OpenID Connect ID token containing user identity claims"),
+  created_at: z.iso.datetime().describe("Timestamp when the token was created"),
+});
+
+export const CredentialInputSchema = z.object({
+  connection_id: z.string(),
+  token: TokenSchema,
+  created_at: z.iso.datetime(),
+});
+
+export const CredentialSchema = CredentialInputSchema.extend({
+  credential_id: z.string(),
 });
 
 export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
@@ -63,8 +74,13 @@ export const StatsSchema = z.object({
 
 export type OAuthClientInput = z.infer<typeof OAuthClientInputSchema>;
 export type OAuthClient = z.infer<typeof OAuthClientSchema>;
+
 export type ConnectionInput = z.infer<typeof ConnectionInputSchema>;
 export type Connection = z.infer<typeof ConnectionSchema>;
+
+export type CredentialInput = z.infer<typeof CredentialInputSchema>;
+export type Credential = z.infer<typeof CredentialSchema>;
+
 export type Token = z.infer<typeof TokenSchema>;
 export type PaginatedResponse<T> = {
   next_cursor?: string;

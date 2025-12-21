@@ -1,4 +1,10 @@
 services:
+  oauth-dummy:
+    image: oven/bun:1.3.4
+    volumes:
+      - .:/app
+    command: ["bun", "/app/tests/"]
+
   db:
     image: duckdb/duckdb:latest
 
