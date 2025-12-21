@@ -8,7 +8,7 @@ import type {
   Stats,
   StorageInstance,
 } from "./storage/dtos/storage-instance.dto";
-import { MemoryInstance } from "./storage/memory";
+import { MemoryInstance } from "./storage/memory-storage";
 import { ulid } from "ulid";
 import { Temporal } from "temporal-polyfill";
 
