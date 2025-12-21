@@ -1,5 +1,5 @@
 import { DuckDBInstance } from "@duckdb/node-api";
-import { MigrationDuckDB } from "../../connections/duckdb.js";
+import { DuckDBMigratory } from "./migrants/duckdb-migratory.js";
 import type {
   StorageInstance,
   Connection,
@@ -13,7 +13,7 @@ import type {
 
 export class DuckDBStorageInstance implements StorageInstance {
   readonly migrated =
-    Promise.withResolvers<Awaited<MigrationDuckDB["migrated"]>>();
+    Promise.withResolvers<Awaited<DuckDBMigratory["migrated"]>>();
 
   constructor(readonly options: { database: { path: string } }) {
     this.#setup().then(
@@ -29,7 +29,7 @@ export class DuckDBStorageInstance implements StorageInstance {
   async #setup() {
     const instance = await DuckDBInstance.create(this.options.database.path);
     const conn = await instance.connect();
-    const migrated = await new MigrationDuckDB(conn).migrated;
+    const migrated = await new DuckDBMigratory(conn).migrated;
     return {
       instance,
       conn,

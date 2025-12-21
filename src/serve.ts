@@ -1,6 +1,5 @@
 import { serve } from "bun";
 import config from "./config.js";
-// import { router } from "./router.js";
 import { Router } from "artur";
 import { TokenStorage } from "./token-storage/token-storage.js";
 import { TokenStorageHTTPTransport } from "./token-storage/transports/http-transport.js";

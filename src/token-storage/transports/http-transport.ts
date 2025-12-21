@@ -1,6 +1,6 @@
 import z from "zod";
-import type { TokenStorage } from "../token-storage.ts";
-import * as schemas from "../../schemas.ts";
+import type { TokenStorage } from "../token-storage.js";
+import * as schemas from "../../schemas.js";
 import { JsonRpcRouter } from "artur";
 
 export class TokenStorageHTTPTransport {

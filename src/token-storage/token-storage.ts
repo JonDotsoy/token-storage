@@ -7,8 +7,8 @@ import type {
   OAuthClientInput,
   Stats,
   StorageInstance,
-} from "./storage/dtos/storage-instance.dto";
-import { MemoryInstance } from "./storage/memory-storage";
+} from "./storage/dtos/storage-instance.dto.js";
+import { MemoryInstance } from "./storage/memory-storage.js";
 import { ulid } from "ulid";
 import { Temporal } from "temporal-polyfill";
 

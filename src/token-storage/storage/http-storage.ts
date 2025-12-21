@@ -1,5 +1,5 @@
 import z from "zod";
-import * as schemas from "../../schemas";
+import * as schemas from "../../schemas.js";
 import type {
   Connection,
   ConnectionInput,
@@ -9,7 +9,7 @@ import type {
   OAuthClientInput,
   Stats,
   StorageInstance,
-} from "./dtos/storage-instance.dto";
+} from "./dtos/storage-instance.dto.js";
 
 const jsonRpcResponseSchema = z.union([
   z.object({

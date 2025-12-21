@@ -1,17 +1,17 @@
 import { describe, test, expect } from "bun:test";
-import { MigrationDuckDB } from "./duckdb";
+import { DuckDBMigratory } from "./duckdb-migratory";
 import { DuckDBInstance } from "@duckdb/node-api";
 
 describe("MigrationDuckDB", () => {
   test("should create a MigrationDuckDB instance correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
-    await new MigrationDuckDB(conn).migrated;
+    await new DuckDBMigratory(conn).migrated;
   });
   test("should save and retrieve an OAuth client correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
-    const migrated = await new MigrationDuckDB(conn).migrated;
+    const migrated = await new DuckDBMigratory(conn).migrated;
 
     await migrated.putOAuthClient("aaa", {
       client_id: "aaa",
@@ -40,7 +40,7 @@ describe("MigrationDuckDB", () => {
   test("should save and retrieve a connection correctly", async () => {
     const instance = await DuckDBInstance.create();
     const conn = await instance.connect();
-    const migrated = await new MigrationDuckDB(conn).migrated;
+    const migrated = await new DuckDBMigratory(conn).migrated;
 
     await migrated.putConnection("aaa", {
       client_id: "aaa",

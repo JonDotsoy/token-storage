@@ -1,5 +1,5 @@
 import type { Client } from "pg";
-import { MigrationPostgresQL } from "../../connections/postgresql.js";
+import { PostgreSQLMigratory } from "./migrants/postgresql-migratory.js";
 import type {
   Connection,
   ConnectionInput,
@@ -9,11 +9,11 @@ import type {
   OAuthClientInput,
   Stats,
   StorageInstance,
-} from "./dtos/storage-instance.dto";
+} from "./dtos/storage-instance.dto.js";
 
 export class PostgresQLStorageInstance implements StorageInstance {
   readonly migrated =
-    Promise.withResolvers<Awaited<MigrationPostgresQL["migrated"]>>();
+    Promise.withResolvers<Awaited<PostgreSQLMigratory["migrated"]>>();
 
   constructor(options: { client: Client }) {
     this.#setup(options.client).then(
@@ -27,7 +27,7 @@ export class PostgresQLStorageInstance implements StorageInstance {
   }
 
   async #setup(conn: Client) {
-    const migrated = await new MigrationPostgresQL(conn).migrated;
+    const migrated = await new PostgreSQLMigratory(conn).migrated;
     return {
       conn,
       migrated,
