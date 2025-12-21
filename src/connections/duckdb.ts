@@ -100,33 +100,32 @@ export class MigrationDuckDB {
             );
             await connection.run("CHECKPOINT");
           },
-        })
-          .next({
-            version: 1,
-            name: "create oauth_clients",
-            up: (connection) => {
-              return {
-                async run() {
-                  await connection.run(create_table_oauth_clients_sql);
-                  await connection.run(create_table_connections_sql);
-                  await connection.run(create_table_tokens_sql);
+        }).next({
+          version: 1,
+          name: "create oauth_clients",
+          up: (connection) => {
+            return {
+              async run() {
+                await connection.run(create_table_oauth_clients_sql);
+                await connection.run(create_table_connections_sql);
+                await connection.run(create_table_tokens_sql);
+              },
+              utils: {
+                async getOAuthClients() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM oauth_clients",
+                  );
+                  return result.getRowObjectsJS().map((obj) => ({
+                    ...obj,
+                    created_at: new Date(`${obj.created_at}`).toISOString(),
+                  })) as OAUTH_CLIENT[];
                 },
-                utils: {
-                  async getOAuthClients() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM oauth_clients",
-                    );
-                    return result.getRowObjectsJS().map((obj) => ({
-                      ...obj,
-                      created_at: new Date(`${obj.created_at}`).toISOString(),
-                    })) as OAUTH_CLIENT[];
-                  },
-                  async putOAuthClient(
-                    oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
-                    data: Omit<OAUTH_CLIENT, "oauth_client_id">,
-                  ) {
-                    await connection.run(
-                      `
+                async putOAuthClient(
+                  oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
+                  data: Omit<OAUTH_CLIENT, "oauth_client_id">,
+                ) {
+                  await connection.run(
+                    `
                                             INSERT INTO oauth_clients (
                                                 oauth_client_id,
                                                 client_id,
@@ -138,63 +137,63 @@ export class MigrationDuckDB {
                                                 created_at
                                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                                         `,
-                      [
-                        oauth_client_id,
-                        data.client_id,
-                        data.project_id,
-                        data.auth_uri,
-                        data.token_uri,
-                        data.auth_provider_x509_cert_url,
-                        data.client_secret,
-                        data.created_at,
-                      ],
-                    );
-                  },
-                  async getOAuthClient(
-                    oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
-                  ) {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM oauth_clients WHERE oauth_client_id = ?",
-                      [oauth_client_id],
-                    );
-                    const [obj=null] = result.getRowObjectsJS();
-                    if (!obj) return null;
-                    return {
-                      ...obj,
-                      created_at: new Date(`${obj.created_at}`).toISOString(),
-                    } as OAUTH_CLIENT;
-                  },
-                  async deleteOAuthClient(
-                    oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
-                  ) {
-                    await connection.run(
-                      "DELETE FROM oauth_clients WHERE oauth_client_id = ?",
-                      [oauth_client_id],
-                    );
-                  },
-                  async countDocumentsOAuthClients() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT COUNT(*) as count FROM oauth_clients",
-                    );
-                    const [obj] = result.getRowObjectsJS();
-                    return Number(obj?.count ?? 0);
-                  },
-                  async getConnections() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM connections ORDER BY created_at DESC",
-                    );
-                    return result.getRowObjectsJS().map((obj) => ({
-                      ...obj,
-                      scope: JSON.parse(`${obj.scope}`),
-                      created_at: new Date(`${obj.created_at}`),
-                    })) as CONNECTION[];
-                  },
-                  async putConnection(
-                    connection_id: CONNECTION["connection_id"],
-                    data: Omit<CONNECTION, "connection_id">,
-                  ) {
-                    await connection.run(
-                      `
+                    [
+                      oauth_client_id,
+                      data.client_id,
+                      data.project_id,
+                      data.auth_uri,
+                      data.token_uri,
+                      data.auth_provider_x509_cert_url,
+                      data.client_secret,
+                      data.created_at,
+                    ],
+                  );
+                },
+                async getOAuthClient(
+                  oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
+                ) {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM oauth_clients WHERE oauth_client_id = ?",
+                    [oauth_client_id],
+                  );
+                  const [obj = null] = result.getRowObjectsJS();
+                  if (!obj) return null;
+                  return {
+                    ...obj,
+                    created_at: new Date(`${obj.created_at}`).toISOString(),
+                  } as OAUTH_CLIENT;
+                },
+                async deleteOAuthClient(
+                  oauth_client_id: OAUTH_CLIENT["oauth_client_id"],
+                ) {
+                  await connection.run(
+                    "DELETE FROM oauth_clients WHERE oauth_client_id = ?",
+                    [oauth_client_id],
+                  );
+                },
+                async countDocumentsOAuthClients() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT COUNT(*) as count FROM oauth_clients",
+                  );
+                  const [obj] = result.getRowObjectsJS();
+                  return Number(obj?.count ?? 0);
+                },
+                async getConnections() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM connections ORDER BY created_at DESC",
+                  );
+                  return result.getRowObjectsJS().map((obj) => ({
+                    ...obj,
+                    scope: JSON.parse(`${obj.scope}`),
+                    created_at: new Date(`${obj.created_at}`),
+                  })) as CONNECTION[];
+                },
+                async putConnection(
+                  connection_id: CONNECTION["connection_id"],
+                  data: Omit<CONNECTION, "connection_id">,
+                ) {
+                  await connection.run(
+                    `
                                             INSERT INTO connections (
                                                 connection_id,
                                                 client_id,
@@ -202,69 +201,69 @@ export class MigrationDuckDB {
                                                 created_at
                                             ) VALUES (?, ?, ?, ?)
                                         `,
-                      [
-                        connection_id,
-                        data.client_id,
-                        JSON.stringify(data.scope),
-                        new Date(data.created_at).toISOString(),
-                      ],
-                    );
-                  },
-                  async getConnection(
-                    connection_id: CONNECTION["connection_id"],
-                  ) {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM connections WHERE connection_id = ?",
-                      [connection_id],
-                    );
-                    const [obj] = result.getRowObjectsJS();
-                    if (!obj) return null;
-                    return {
-                      ...obj,
-                      scope: JSON.parse(`${obj.scope}`),
-                      created_at: new Date(`${obj.created_at}`),
-                    } as CONNECTION;
-                  },
-                  async deleteConnection(
-                    connection_id: CONNECTION["connection_id"],
-                  ) {
-                    await connection.run(
-                      "DELETE FROM connections WHERE connection_id = ?",
-                      [connection_id],
-                    );
-                  },
-                  async countDocumentsConnections() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT COUNT(*) as count FROM connections",
-                    );
-                    const [obj] = result.getRowObjectsJS();
-                    return Number(obj?.count ?? 0);
-                  },
-                  async getCredentials() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM credentials",
-                    );
-                    return result.getRowObjectsJS().map((obj) => ({
-                      ...obj,
-                      created_at: new Date(`${obj.created_at}`),
-                    })) as CREDENTIAL[];
-                  },
-                  async getCredentialsByConnectionId(connection_id: string) {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM credentials WHERE connection_id = ?",
-                      [connection_id],
-                    );
-                    return result.getRowObjectsJS().map((obj) => ({
-                      ...obj,
-                      created_at: new Date(`${obj.created_at}`),
-                    })) as CREDENTIAL[];
-                  },
-                  async putCredential(
-                    authorization_id: CREDENTIAL["authorization_id"],
-                    data: Omit<CREDENTIAL, "authorization_id">,
-                  ) {
-                    await connection.run(
-                      `
+                    [
+                      connection_id,
+                      data.client_id,
+                      JSON.stringify(data.scope),
+                      new Date(data.created_at).toISOString(),
+                    ],
+                  );
+                },
+                async getConnection(
+                  connection_id: CONNECTION["connection_id"],
+                ) {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM connections WHERE connection_id = ?",
+                    [connection_id],
+                  );
+                  const [obj] = result.getRowObjectsJS();
+                  if (!obj) return null;
+                  return {
+                    ...obj,
+                    scope: JSON.parse(`${obj.scope}`),
+                    created_at: new Date(`${obj.created_at}`),
+                  } as CONNECTION;
+                },
+                async deleteConnection(
+                  connection_id: CONNECTION["connection_id"],
+                ) {
+                  await connection.run(
+                    "DELETE FROM connections WHERE connection_id = ?",
+                    [connection_id],
+                  );
+                },
+                async countDocumentsConnections() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT COUNT(*) as count FROM connections",
+                  );
+                  const [obj] = result.getRowObjectsJS();
+                  return Number(obj?.count ?? 0);
+                },
+                async getCredentials() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM credentials",
+                  );
+                  return result.getRowObjectsJS().map((obj) => ({
+                    ...obj,
+                    created_at: new Date(`${obj.created_at}`),
+                  })) as CREDENTIAL[];
+                },
+                async getCredentialsByConnectionId(connection_id: string) {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM credentials WHERE connection_id = ?",
+                    [connection_id],
+                  );
+                  return result.getRowObjectsJS().map((obj) => ({
+                    ...obj,
+                    created_at: new Date(`${obj.created_at}`),
+                  })) as CREDENTIAL[];
+                },
+                async putCredential(
+                  authorization_id: CREDENTIAL["authorization_id"],
+                  data: Omit<CREDENTIAL, "authorization_id">,
+                ) {
+                  await connection.run(
+                    `
                                             INSERT INTO credentials (
                                                 authorization_id,
                                                 connection_id,
@@ -277,51 +276,52 @@ export class MigrationDuckDB {
                                                 created_at
                                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                                         `,
-                      [
-                        authorization_id,
-                        data.connection_id,
-                        data.access_token,
-                        data.expires_in,
-                        data.refresh_token,
-                        data.scope,
-                        data.token_type,
-                        data.id_token,
-                        new Date(data.created_at).toISOString(),
-                      ],
-                    );
-                  },
-                  async getCredential(authorization_id: CREDENTIAL["authorization_id"]) {
-                    const result = await connection.runAndReadAll(
-                      "SELECT * FROM credentials WHERE authorization_id = ?",
-                      [authorization_id],
-                    );
-                    const [obj] = result.getRowObjectsJS();
-                    if (!obj) return null;
-                    return {
-                      ...obj,
-                      created_at: new Date(`${obj.created_at}`),
-                    } as CREDENTIAL;
-                  },
-                  async deleteCredential(
-                    authorization_id: CREDENTIAL["authorization_id"],
-                  ) {
-                    await connection.run(
-                      "DELETE FROM credentials WHERE authorization_id = ?",
-                      [authorization_id],
-                    );
-                  },
-                  async countDocumentsCredentials() {
-                    const result = await connection.runAndReadAll(
-                      "SELECT COUNT(*) as count FROM credentials",
-                    );
-                    const [obj] = result.getRowObjectsJS();
-                    return Number(obj?.count ?? 0);
-                  },
+                    [
+                      authorization_id,
+                      data.connection_id,
+                      data.access_token,
+                      data.expires_in,
+                      data.refresh_token,
+                      data.scope,
+                      data.token_type,
+                      data.id_token,
+                      new Date(data.created_at).toISOString(),
+                    ],
+                  );
                 },
-              };
-            },
-          })
-          .migrated;
+                async getCredential(
+                  authorization_id: CREDENTIAL["authorization_id"],
+                ) {
+                  const result = await connection.runAndReadAll(
+                    "SELECT * FROM credentials WHERE authorization_id = ?",
+                    [authorization_id],
+                  );
+                  const [obj] = result.getRowObjectsJS();
+                  if (!obj) return null;
+                  return {
+                    ...obj,
+                    created_at: new Date(`${obj.created_at}`),
+                  } as CREDENTIAL;
+                },
+                async deleteCredential(
+                  authorization_id: CREDENTIAL["authorization_id"],
+                ) {
+                  await connection.run(
+                    "DELETE FROM credentials WHERE authorization_id = ?",
+                    [authorization_id],
+                  );
+                },
+                async countDocumentsCredentials() {
+                  const result = await connection.runAndReadAll(
+                    "SELECT COUNT(*) as count FROM credentials",
+                  );
+                  const [obj] = result.getRowObjectsJS();
+                  return Number(obj?.count ?? 0);
+                },
+              },
+            };
+          },
+        }).migrated;
       }),
   ) {}
 }
