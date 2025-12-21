@@ -12,8 +12,9 @@ import { Client } from "pg";
 import { PostgresQLStorageInstance } from "./postgresql-storage.js";
 
 const ms5m = 5 * 60 * 1000;
+const isCI = process.env.CI !== undefined;
 
-describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
+describe.skipIf(isCI)("PostgreSQL Storage", () => {
   let containerId: string | null = null;
   let client: Client | null = null;
   let storage: PostgresQLStorageInstance | null = null;
