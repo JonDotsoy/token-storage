@@ -1,11 +1,10 @@
 {
   "name": "token-storage",
+  "version": "0.0.0",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@playwright/test": "1.57.0",
-    "@testcontainers/postgresql": "11.10.0",
     "@types/bun": "latest",
     "@types/node": "25.0.3",
     "@types/pg": "8.16.0",
@@ -16,7 +15,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@duckdb/node-api": "1.4.3-r.1",
     "@jondotsoy/utils-js": "1.4.1",
     "artur": "1.11.1",
     "temporal-polyfill": "0.3.0",
@@ -26,5 +24,8 @@
   "scripts": {
     "lint": "prettier --check .",
     "fmt": "prettier --write ."
+  },
+  "optionalDependencies": {
+    "@duckdb/node-api": "1.4.3-r.1"
   }
 }

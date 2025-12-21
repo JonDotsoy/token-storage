@@ -12,14 +12,6 @@ import { MemoryInstance } from "./storage/memory-storage";
 import { ulid } from "ulid";
 import { Temporal } from "temporal-polyfill";
 
-const result = async <T>(cb: () => Promise<T>) => {
-  try {
-    return [true, null, await cb()] as const;
-  } catch (ex) {
-    return [false, ex, null] as const;
-  }
-};
-
 interface TokenStorageOptions {
   db: StorageInstance;
 }
@@ -27,7 +19,7 @@ interface TokenStorageOptions {
 export class TokenStorage implements StorageInstance {
   #options: TokenStorageOptions;
 
-  constructor(options?: TokenStorageOptions) {
+  constructor(options?: Partial<TokenStorageOptions>) {
     this.#options = {
       db: options?.db ?? new MemoryInstance(),
     };
@@ -158,7 +150,7 @@ export class TokenStorage implements StorageInstance {
     await this.putCredential(credential_id, {
       connection_id,
       token: data,
-      created_at: new Date(Date.now()),
+      created_at: new Date(Date.now()).toISOString(),
     });
     return { credential_id };
   }
@@ -180,7 +172,7 @@ export class TokenStorage implements StorageInstance {
     return res.json();
   }
 
-  async getToken(credential_id: string) {
+  async getToken(credential_id: string): Promise<Credential["token"]> {
     const credential = await this.getCredential(credential_id);
     if (!credential) {
       throw new Error("Credential not found");
@@ -194,9 +186,9 @@ export class TokenStorage implements StorageInstance {
       throw new Error("OAuth client not found");
     }
 
-    const expiration_at = Temporal.Instant.fromEpochMilliseconds(
-      credential.created_at.getTime(),
-    ).add({ seconds: credential.token.expires_in });
+    const expiration_at = Temporal.Instant.from(credential.created_at).add({
+      seconds: credential.token.expires_in,
+    });
 
     const untilNow = Temporal.Now.instant().until(expiration_at);
 
@@ -213,7 +205,7 @@ export class TokenStorage implements StorageInstance {
       await this.putCredential(credential_id, {
         connection_id: credential.connection_id,
         token: nextToken,
-        created_at: new Date(Date.now()),
+        created_at: new Date(Date.now()).toISOString(),
       });
       return nextToken;
     }

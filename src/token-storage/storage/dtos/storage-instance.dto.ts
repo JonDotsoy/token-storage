@@ -45,4 +45,14 @@ export interface StorageInstance {
   getCredentials(): AsyncIterable<Credential>;
 
   getStats(): Promise<Stats>;
+
+  getAuthURL?(connection_id: string, redirect_uri: string): Promise<string>;
+
+  exchangeCode?(
+    connection_id: string,
+    redirect_uri: string,
+    code: string,
+  ): Promise<{ credential_id: string }>;
+
+  getToken?(credential_id: string): Promise<Credential["token"]>;
 }
