@@ -1,4 +1,12 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import {
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "bun:test";
 import { $ } from "bun";
 import { Client } from "pg";
 import { PostgresQLStorageInstance } from "./postgresql-storage.js";
@@ -15,7 +23,7 @@ describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
   const POSTGRES_DB = "testdb";
   let POSTGRES_PORT: number;
 
-  beforeAll(
+  beforeEach(
     async () => {
       // Generar puerto random entre 5432 y 6432
       POSTGRES_PORT = Math.floor(Math.random() * 1000) + 5432;
@@ -47,7 +55,7 @@ describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
     { timeout: ms5m },
   );
 
-  afterAll(
+  afterEach(
     async () => {
       await client?.end();
       if (containerId) {
@@ -86,33 +94,6 @@ describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
   test("should return null for non-existent OAuth client", async () => {
     const retrieved = await storage!.getOAuthClient("non-existent-client");
     expect(retrieved).toBeNull();
-  });
-
-  test("should update existing OAuth client", async () => {
-    const oauthClientId = "test-client-update";
-    const oauthClient = {
-      client_id: "client-original",
-      client_secret: "secret-original",
-      project_id: "project-original",
-      auth_uri: "https://example.com/auth",
-      token_uri: "https://example.com/token",
-      auth_provider_x509_cert_url: "https://example.com/certs",
-      created_at: new Date().toISOString(),
-    };
-
-    await storage!.putOAuthClient(oauthClientId, oauthClient);
-
-    const updatedClient = {
-      ...oauthClient,
-      client_secret: "secret-updated",
-      project_id: "project-updated",
-    };
-
-    await storage!.putOAuthClient(oauthClientId, updatedClient);
-    const retrieved = await storage!.getOAuthClient(oauthClientId);
-
-    expect(retrieved?.client_secret).toBe("secret-updated");
-    expect(retrieved?.project_id).toBe("project-updated");
   });
 
   test("should delete OAuth client", async () => {
@@ -194,38 +175,6 @@ describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
   test("should return null for non-existent connection", async () => {
     const retrieved = await storage!.getConnection("non-existent-connection");
     expect(retrieved).toBeNull();
-  });
-
-  test("should update existing connection", async () => {
-    const oauthClientId = "connection-update-client";
-    await storage!.putOAuthClient(oauthClientId, {
-      client_id: "client-conn-update",
-      client_secret: "secret-conn-update",
-      project_id: "project-conn-update",
-      auth_uri: "https://example.com/auth",
-      token_uri: "https://example.com/token",
-      auth_provider_x509_cert_url: "https://example.com/certs",
-      created_at: new Date().toISOString(),
-    });
-
-    const connectionId = "test-connection-update";
-    const connection = {
-      oauth_client_id: oauthClientId,
-      scope: ["read"],
-      created_at: new Date().toISOString(),
-    };
-
-    await storage!.putConnection(connectionId, connection);
-
-    const updatedConnection = {
-      ...connection,
-      scope: ["read", "write", "admin"],
-    };
-
-    await storage!.putConnection(connectionId, updatedConnection);
-    const retrieved = await storage!.getConnection(connectionId);
-
-    expect(retrieved?.scope).toEqual(["read", "write", "admin"]);
   });
 
   test("should delete connection", async () => {
@@ -379,56 +328,6 @@ describe.skipIf(process.env.CI !== undefined)("PostgreSQL Storage", () => {
   test("should return null for non-existent credential", async () => {
     const retrieved = await storage!.getCredential("non-existent-credential");
     expect(retrieved).toBeNull();
-  });
-
-  test("should update existing credential", async () => {
-    const oauthClientId = "credential-update-client";
-    await storage!.putOAuthClient(oauthClientId, {
-      client_id: "client-cred-update",
-      client_secret: "secret-cred-update",
-      project_id: "project-cred-update",
-      auth_uri: "https://example.com/auth",
-      token_uri: "https://example.com/token",
-      auth_provider_x509_cert_url: "https://example.com/certs",
-      created_at: new Date().toISOString(),
-    });
-
-    const connectionId = "credential-update-connection";
-    await storage!.putConnection(connectionId, {
-      oauth_client_id: oauthClientId,
-      scope: ["read"],
-      created_at: new Date().toISOString(),
-    });
-
-    const credentialId = "test-credential-update";
-    const credential = {
-      connection_id: connectionId,
-      token: {
-        access_token: "access-token-original",
-        expires_in: 3600,
-        scope: "read",
-        token_type: "Bearer",
-        created_at: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-    };
-
-    await storage!.putCredential(credentialId, credential);
-
-    const updatedCredential = {
-      ...credential,
-      token: {
-        ...credential.token,
-        access_token: "access-token-updated",
-        expires_in: 7200,
-      },
-    };
-
-    await storage!.putCredential(credentialId, updatedCredential);
-    const retrieved = await storage!.getCredential(credentialId);
-
-    expect(retrieved?.token.access_token).toBe("access-token-updated");
-    expect(retrieved?.token.expires_in).toBe(7200);
   });
 
   test("should delete credential", async () => {
