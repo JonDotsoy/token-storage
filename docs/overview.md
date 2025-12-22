@@ -18,14 +18,21 @@ Token Storage es un sistema de gestión de tokens OAuth 2.0 que proporciona alma
 
 #### Características Principales
 
-1. **Abstracción de Almacenamiento**: Permite usar diferentes backends de almacenamiento (memoria, DuckDB)
+1. **Abstracción de Almacenamiento**: Permite usar diferentes backends de almacenamiento (memoria, DuckDB, PostgreSQL, HTTP)
 2. **Renovación Automática**: Detecta tokens expirados y los renueva automáticamente
 3. **Flujo OAuth Completo**: Implementa el flujo de autorización OAuth 2.0 completo
 4. **Gestión de Ciclo de Vida**: Maneja la creación, lectura, actualización y eliminación de entidades
+5. **Arquitectura distribuida**: Soporta almacenamiento remoto via HTTP JSON-RPC
 
 ## Componentes del Sistema
 
 ### 1. Entidades Principales
+
+Para documentación detallada de cada entidad, ver:
+
+- [OAuthClient](./fundamentals/OAuthClient.md)
+- [Connection](./fundamentals/Connection.md)
+- [Credential](./fundamentals/Credential.md)
 
 #### OAuthClient
 
@@ -113,7 +120,14 @@ Define el contrato que deben cumplir todas las implementaciones de almacenamient
 
 #### Implementaciones Disponibles
 
-##### MemoryInstance
+Para documentación detallada de cada data source, ver:
+
+- [Memory Storage](./data-sources/memory.md) - Almacenamiento en memoria
+- [DuckDB Storage](./data-sources/duckdb.md) - Base de datos embebida
+- [PostgreSQL Storage](./data-sources/postgresql.md) - Base de datos PostgreSQL
+- [HTTP Storage](./data-sources/http-storage.md) - Cliente remoto via JSON-RPC
+
+##### MemoryStorage
 
 Almacenamiento en memoria usando `Map` de JavaScript.
 
@@ -128,36 +142,126 @@ Almacenamiento en memoria usando `Map` de JavaScript.
 
 ```typescript
 import { TokenStorage } from "./token-storage";
-import { MemoryInstance } from "./storage/memory-storage";
+import { MemoryStorage } from "./storage/memory-storage";
 
 const storage = new TokenStorage({
-  db: new MemoryInstance(),
+  db: new MemoryStorage(),
 });
 ```
 
-##### DuckDBStorageInstance
+##### DuckDBStorage
 
 Almacenamiento persistente usando DuckDB.
 
 **Características:**
 
 - Persistencia en disco
-- Ideal para producción
-- Soporte para consultas SQL
+- Ideal para aplicaciones standalone
+- Base de datos embebida (sin servidor)
 - Migraciones automáticas
 
 **Uso:**
 
 ```typescript
 import { TokenStorage } from "./token-storage";
-import { DuckDBStorageInstance } from "./storage/duckdb-storage";
+import { DuckDBStorage } from "./storage/duckdb-storage";
 
 const storage = new TokenStorage({
-  db: new DuckDBStorageInstance({
+  db: new DuckDBStorage({
     database: { path: "./tokens.db" },
   }),
 });
 ```
+
+##### PostgresQLStorage
+
+Almacenamiento persistente usando PostgreSQL.
+
+**Características:**
+
+- Persistencia robusta
+- Ideal para producción con múltiples instancias
+- Transacciones ACID
+- Migraciones automáticas
+
+**Uso:**
+
+```typescript
+import { TokenStorage } from "./token-storage";
+import { PostgresQLStorage } from "./storage/postgresql-storage";
+import { Client } from "pg";
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+});
+await client.connect();
+
+const storage = new TokenStorage({
+  db: new PostgresQLStorage({ client }),
+});
+```
+
+##### HTTPStorage
+
+Cliente que se conecta a un servidor remoto via JSON-RPC 2.0.
+
+**Características:**
+
+- Almacenamiento centralizado
+- Ideal para arquitecturas distribuidas
+- Múltiples clientes compartiendo tokens
+- Protocolo estándar JSON-RPC 2.0
+
+**Uso:**
+
+```typescript
+import { TokenStorage } from "./token-storage";
+import { HTTPStorage } from "./storage/http-storage";
+
+const storage = new TokenStorage({
+  db: new HTTPStorage(new URL("http://localhost:5454/rpc")),
+});
+```
+
+### 3. Transports
+
+Los transports permiten exponer `TokenStorage` a través de diferentes protocolos.
+
+#### TokenStorageHTTPTransport
+
+Expone una instancia de `TokenStorage` via HTTP usando JSON-RPC 2.0.
+
+**Características:**
+
+- Servidor JSON-RPC 2.0
+- Validación automática con Zod
+- Introspección de métodos
+- Framework agnóstico
+
+**Uso:**
+
+```typescript
+import { TokenStorageHTTPTransport } from "./transports/http-transport";
+import { DuckDBStorage } from "./storage/duckdb-storage";
+
+const storage = new TokenStorage({
+  db: new DuckDBStorage({ database: { path: "./tokens.db" } }),
+});
+
+const transport = new TokenStorageHTTPTransport(storage);
+
+Bun.serve({
+  port: 5454,
+  async fetch(req) {
+    if (req.method === "POST" && new URL(req.url).pathname === "/rpc") {
+      return await transport.jsonRpcRouter.fetch(req);
+    }
+    return new Response("Not Found", { status: 404 });
+  },
+});
+```
+
+Ver [HTTP JSON-RPC Transport](./transports/http-json-rpc.md) para documentación completa.
 
 ## Flujo de Trabajo OAuth
 
@@ -294,7 +398,31 @@ await tokenStorage.deleteCredential("cred-789");
 Para comenzar a usar Token Storage:
 
 1. Instala las dependencias: `bun install`
-2. Crea una instancia de `TokenStorage`
-3. Registra tus clientes OAuth
-4. Implementa el flujo de autorización en tu aplicación
-5. Usa `getToken()` para obtener tokens válidos automáticamente
+2. Elige un data source según tu caso de uso:
+   - **Desarrollo/Testing**: [MemoryStorage](./data-sources/memory.md)
+   - **Aplicación standalone**: [DuckDBStorage](./data-sources/duckdb.md)
+   - **Producción con múltiples instancias**: [PostgresQLStorage](./data-sources/postgresql.md)
+   - **Arquitectura distribuida**: [HTTPStorage](./data-sources/http-storage.md)
+3. Crea una instancia de `TokenStorage`
+4. Registra tus clientes OAuth
+5. Implementa el flujo de autorización en tu aplicación
+6. Usa `getToken()` para obtener tokens válidos automáticamente
+
+## Documentación Adicional
+
+### Conceptos Fundamentales
+
+- [OAuthClient](./fundamentals/OAuthClient.md)
+- [Connection](./fundamentals/Connection.md)
+- [Credential](./fundamentals/Credential.md)
+
+### Data Sources
+
+- [Memory Storage](./data-sources/memory.md)
+- [DuckDB Storage](./data-sources/duckdb.md)
+- [PostgreSQL Storage](./data-sources/postgresql.md)
+- [HTTP Storage](./data-sources/http-storage.md)
+
+### Transports
+
+- [HTTP JSON-RPC Transport](./transports/http-json-rpc.md)
