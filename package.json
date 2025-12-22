@@ -17,6 +17,18 @@
     "./transports/http-transport": {
       "import": "./lib/esm/token-storage/transports/http-transport.js",
       "types": "./lib/types/token-storage/transports/http-transport.d.ts"
+    },
+    "./storage/memory-storage": {
+      "import": "./lib/esm/token-storage/storage/memory-storage.js",
+      "types": "./lib/types/token-storage/storage/memory-storage.d.ts"
+    },
+    "./storage/postgresql-storage": {
+      "import": "./lib/esm/token-storage/storage/postgresql-storage.js",
+      "types": "./lib/types/token-storage/storage/postgresql-storage.d.ts"
+    },
+    "./storage/duckdb-storage": {
+      "import": "./lib/esm/token-storage/storage/duckdb-storage.js",
+      "types": "./lib/types/token-storage/storage/duckdb-storage.d.ts"
     }
   },
   "files": [

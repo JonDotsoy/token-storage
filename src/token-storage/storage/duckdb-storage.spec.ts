@@ -6,7 +6,7 @@ import {
   beforeAll,
   afterAll,
 } from "bun:test";
-import { DuckDBStorageInstance } from "./duckdb-storage";
+import { DuckDBStorage } from "./duckdb-storage";
 import { OAuthClientSchema } from "../../schemas";
 
 describe("test1", () => {
@@ -19,7 +19,7 @@ describe("test1", () => {
   });
 
   test("should store and retrieve OAuth client", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -55,7 +55,7 @@ describe("test1", () => {
   });
 
   test("should return null when OAuth client does not exist", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -64,7 +64,7 @@ describe("test1", () => {
   });
 
   test("should delete OAuth client", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -94,7 +94,7 @@ describe("test1", () => {
   });
 
   test("should list all OAuth clients", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -142,7 +142,7 @@ describe("connections", () => {
   });
 
   test("should store and retrieve connection", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -165,7 +165,7 @@ describe("connections", () => {
   });
 
   test("should return null when connection does not exist", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -174,7 +174,7 @@ describe("connections", () => {
   });
 
   test("should delete connection", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -200,7 +200,7 @@ describe("connections", () => {
   });
 
   test("should list all connections", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -240,7 +240,7 @@ describe("credentials", () => {
   });
 
   test("should store and retrieve credential", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -279,7 +279,7 @@ describe("credentials", () => {
   });
 
   test("should return null when credential does not exist", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -288,7 +288,7 @@ describe("credentials", () => {
   });
 
   test("should delete credential", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -322,7 +322,7 @@ describe("credentials", () => {
   });
 
   test("should list all credentials", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -374,7 +374,7 @@ describe("stats", () => {
   });
 
   test("should return empty stats for new storage", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 
@@ -386,7 +386,7 @@ describe("stats", () => {
   });
 
   test("should return stats after adding entities", async () => {
-    const storage = new DuckDBStorageInstance({
+    const storage = new DuckDBStorage({
       database: { path: ":memory:" },
     });
 

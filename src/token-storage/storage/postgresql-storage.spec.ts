@@ -9,7 +9,7 @@ import {
 } from "bun:test";
 import { $ } from "bun";
 import { Client } from "pg";
-import { PostgresQLStorageInstance } from "./postgresql-storage.js";
+import { PostgresQLStorage } from "./postgresql-storage.js";
 
 const ms5m = 5 * 60 * 1000;
 const isCI = process.env.CI !== undefined;
@@ -17,7 +17,7 @@ const isCI = process.env.CI !== undefined;
 describe.skipIf(isCI)("PostgreSQL Storage", () => {
   let containerId: string | null = null;
   let client: Client | null = null;
-  let storage: PostgresQLStorageInstance | null = null;
+  let storage: PostgresQLStorage | null = null;
 
   const POSTGRES_USER = "testuser";
   const POSTGRES_PASSWORD = "testpass";
@@ -50,7 +50,7 @@ describe.skipIf(isCI)("PostgreSQL Storage", () => {
         database: POSTGRES_DB,
       });
       await client.connect();
-      storage = new PostgresQLStorageInstance({ client });
+      storage = new PostgresQLStorage({ client });
       await storage.migrated.promise;
     },
     { timeout: ms5m },

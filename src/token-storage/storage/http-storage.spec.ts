@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { TokenStorage } from "../token-storage";
 import { TokenStorageHTTPTransport } from "../transports/http-transport";
 import { serve } from "bun";
-import { HTTPStorageInstance } from "./http-storage";
+import { HTTPStorage } from "./http-storage";
 
 describe("test", () => {
   const port = 5480;
@@ -24,7 +24,7 @@ describe("test", () => {
     });
 
     tokenStorage = new TokenStorage({
-      db: new HTTPStorageInstance(new URL("/rpc", server.url)),
+      db: new HTTPStorage(new URL("/rpc", server.url)),
     });
   });
 
@@ -511,7 +511,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware,
     });
 
@@ -542,7 +542,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware,
     });
 
@@ -579,7 +579,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware: authMiddleware,
     });
 
@@ -612,7 +612,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware: retryMiddleware,
     });
 
@@ -658,7 +658,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware: loggingMiddleware,
     });
 
@@ -684,7 +684,7 @@ describe("HTTPStorageInstance middleware", () => {
       };
     };
 
-    const httpStorage = new HTTPStorageInstance(new URL("/rpc", server.url), {
+    const httpStorage = new HTTPStorage(new URL("/rpc", server.url), {
       middleware: countingMiddleware,
     });
 
@@ -751,7 +751,7 @@ describe("HTTPStorageInstance middleware", () => {
 
     try {
       // Test 1: Request without token should fail
-      const httpStorageWithoutToken = new HTTPStorageInstance(
+      const httpStorageWithoutToken = new HTTPStorage(
         new URL("/rpc", secureServer.url),
       );
 
@@ -782,7 +782,7 @@ describe("HTTPStorageInstance middleware", () => {
         };
       };
 
-      const httpStorageWithInvalidToken = new HTTPStorageInstance(
+      const httpStorageWithInvalidToken = new HTTPStorage(
         new URL("/rpc", secureServer.url),
         { middleware: invalidTokenMiddleware },
       );
@@ -814,7 +814,7 @@ describe("HTTPStorageInstance middleware", () => {
         };
       };
 
-      const httpStorageWithValidToken = new HTTPStorageInstance(
+      const httpStorageWithValidToken = new HTTPStorage(
         new URL("/rpc", secureServer.url),
         { middleware: validTokenMiddleware },
       );

@@ -11,7 +11,7 @@ import type {
   CredentialInput,
 } from "./dtos/storage-instance.dto.js";
 
-export class DuckDBStorageInstance implements StorageInstance {
+export class DuckDBStorage implements StorageInstance {
   readonly migrated =
     Promise.withResolvers<Awaited<DuckDBMigratory["migrated"]>>();
 

@@ -10,7 +10,7 @@ import type {
   PaginatedResponse,
 } from "./dtos/storage-instance.dto.js";
 
-export class MemoryInstance implements StorageInstance {
+export class MemoryStorage implements StorageInstance {
   #connections = new Map<string, Connection>();
   #credentials = new Map<string, Credential>();
   #oauthClients = new Map<string, OAuthClient>();

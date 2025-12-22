@@ -58,7 +58,7 @@ const applyMiddleware = (middleware?: Middleware) => {
   return pass(fetch);
 };
 
-export class HTTPStorageInstance implements StorageInstance {
+export class HTTPStorage implements StorageInstance {
   #secuenceId = 1;
   #fetch: (request: Request) => Promise<Response>;
 

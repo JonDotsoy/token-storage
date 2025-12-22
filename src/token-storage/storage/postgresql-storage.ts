@@ -11,7 +11,7 @@ import type {
   StorageInstance,
 } from "./dtos/storage-instance.dto.js";
 
-export class PostgresQLStorageInstance implements StorageInstance {
+export class PostgresQLStorage implements StorageInstance {
   readonly migrated =
     Promise.withResolvers<Awaited<PostgreSQLMigratory["migrated"]>>();
 
