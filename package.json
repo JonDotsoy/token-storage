@@ -1,8 +1,9 @@
 {
   "name": "token-storage",
-  "version": "0.0.0",
+  "description": "A flexible token storage library for managing OAuth credentials with support for multiple storage backends (PostgreSQL, DuckDB, Memory) and HTTP transport",
+  "version": "0.1.0",
   "type": "module",
-  "private": true,
+  "private": false,
   "main": "./lib/esm/token-storage/token-storage.js",
   "types": "./lib/types/token-storage/token-storage.d.ts",
   "exports": {
