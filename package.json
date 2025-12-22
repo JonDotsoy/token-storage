@@ -1,5 +1,5 @@
 {
-  "name": "token-storage",
+  "name": "@jondotsoy/token-storage",
   "description": "A flexible token storage library for managing OAuth credentials with support for multiple storage backends (PostgreSQL, DuckDB, Memory) and HTTP transport",
   "version": "0.1.0",
   "type": "module",
