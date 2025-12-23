@@ -63,5 +63,9 @@
   },
   "optionalDependencies": {
     "@duckdb/node-api": "1.4.3-r.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonDotsoy/tokens.git"
   }
 }
