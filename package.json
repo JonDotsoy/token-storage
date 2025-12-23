@@ -1,0 +1,67 @@
+{
+  "name": "@jondotsoy/token-storage",
+  "description": "A flexible token storage library for managing OAuth credentials with support for multiple storage backends (PostgreSQL, DuckDB, Memory) and HTTP transport",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "main": "./lib/esm/token-storage/token-storage.js",
+  "types": "./lib/types/token-storage/token-storage.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/token-storage/token-storage.js",
+      "types": "./lib/types/token-storage/token-storage.d.ts"
+    },
+    "./serve": {
+      "import": "./lib/esm/serve.js",
+      "types": "./lib/types/serve.d.ts"
+    },
+    "./transports/http-transport": {
+      "import": "./lib/esm/token-storage/transports/http-transport.js",
+      "types": "./lib/types/token-storage/transports/http-transport.d.ts"
+    },
+    "./storage/memory-storage": {
+      "import": "./lib/esm/token-storage/storage/memory-storage.js",
+      "types": "./lib/types/token-storage/storage/memory-storage.d.ts"
+    },
+    "./storage/postgresql-storage": {
+      "import": "./lib/esm/token-storage/storage/postgresql-storage.js",
+      "types": "./lib/types/token-storage/storage/postgresql-storage.d.ts"
+    },
+    "./storage/duckdb-storage": {
+      "import": "./lib/esm/token-storage/storage/duckdb-storage.js",
+      "types": "./lib/types/token-storage/storage/duckdb-storage.d.ts"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "25.0.3",
+    "@types/pg": "8.16.0",
+    "pg": "8.16.3",
+    "prettier": "3.7.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@jondotsoy/utils-js": "1.4.1",
+    "artur": "1.11.1",
+    "temporal-polyfill": "0.3.0",
+    "ulid": "3.0.2",
+    "zod": "4.1.13"
+  },
+  "scripts": {
+    "lint": "prettier --check .",
+    "fmt": "prettier --write .",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build": "bun run build:esm && bun run build:types",
+    "clean": "rm -rf lib",
+    "prepack": "bun run build"
+  },
+  "optionalDependencies": {
+    "@duckdb/node-api": "1.4.3-r.1"
+  }
+}
