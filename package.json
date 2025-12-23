@@ -1,9 +1,8 @@
 {
   "name": "@jondotsoy/token-storage",
   "description": "A flexible token storage library for managing OAuth credentials with support for multiple storage backends (PostgreSQL, DuckDB, Memory) and HTTP transport",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
-  "private": false,
   "main": "./lib/esm/token-storage/token-storage.js",
   "types": "./lib/types/token-storage/token-storage.d.ts",
   "exports": {
@@ -66,6 +65,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JonDotsoy/tokens.git"
+    "url": "git+https://github.com/JonDotsoy/token-storage.git"
   }
 }
