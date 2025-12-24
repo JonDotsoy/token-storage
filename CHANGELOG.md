@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/JonDotsoy/token-storage/compare/v0.3.1...v0.3.2) (2025-12-24)
+
+
+### Bug Fixes
+
+* **http-transport:** allow optional input validation schemas ([68c0cb5](https://github.com/JonDotsoy/token-storage/commit/68c0cb5fede5fa924f1edd0999b5425d83f05c00))
+
 ## [0.3.1](https://github.com/JonDotsoy/token-storage/compare/v0.3.0...v0.3.1) (2025-12-24)
 
 
