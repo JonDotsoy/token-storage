@@ -39,6 +39,7 @@ FROM oven/bun:1.3.4-alpine
 WORKDIR /usr/src/app
 
 COPY --from=build /usr/src/app/tokens-serve.ts /usr/src/app/src/serve.ts
+COPY --from=build /usr/src/app/src/healthcheck.ts /usr/src/app/src/healthcheck.ts
 
 EXPOSE 5454
 
@@ -51,5 +52,8 @@ ENV CORS_ORIGIN=*
 
 # RUN mkdir /data
 VOLUME ["/data"]
+
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD bun src/healthcheck.ts
 
 CMD [ "bun", "run", "src/serve.ts" ]
