@@ -4,6 +4,7 @@ import { Router } from "artur";
 import { TokenStorage } from "./token-storage/token-storage.js";
 import { TokenStorageHTTPTransport } from "./token-storage/transports/http-transport.js";
 import { Temporal } from "temporal-polyfill";
+import { httpTransportProtocol } from "./utils/http-trasport-protocol.js";
 
 const startTime = Temporal.Now.instant();
 
@@ -11,7 +12,10 @@ const router = new Router({
   middlewares: [
     (fetch) => async (req) => {
       const res = await fetch(req);
-      res.headers.append("X-Service-Name", "token-storage");
+      res.headers.append(
+        "X-TokenStorage-Api-Version",
+        httpTransportProtocol.version,
+      );
       return res;
     },
   ],
