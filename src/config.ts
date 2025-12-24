@@ -15,7 +15,7 @@ interface CorsConfig {
 }
 
 interface DatabaseConfig {
-  path: string;
+  uri: string | null;
 }
 
 interface ConfigOptions {
@@ -43,7 +43,7 @@ export class Config {
       credentials: options?.cors?.credentials ?? defaults.cors.credentials,
     };
     this.database = {
-      path: options?.database?.path ?? defaults.database.path,
+      uri: options?.database?.uri ?? defaults.database.uri,
     };
   }
 
@@ -64,7 +64,7 @@ export class Config {
         credentials: true,
       },
       database: {
-        path: "./db",
+        uri: null,
       },
     };
   }
@@ -76,7 +76,7 @@ export class Config {
         ?.pipe((v) => Number(v)).value ?? null;
     const hostname = env("HOST")?.string()?.value ?? null;
     const corsOrigin = env("CORS_ORIGIN")?.string()?.value ?? null;
-    const dbPath = env("DB_PATH")?.string()?.value ?? null;
+    const dbUri = env("DB_URI")?.string()?.value ?? null;
     const defaultValues = Config.defaultValues();
 
     return new Config({
@@ -98,10 +98,10 @@ export class Config {
           options?.cors?.credentials ?? defaultValues.cors.credentials,
       },
       database: {
-        path: options?.database?.path ?? dbPath ?? defaultValues.database.path,
+        uri: options?.database?.uri ?? dbUri ?? defaultValues.database.uri,
       },
     });
   }
 }
 
-export default Config.fromEnvironment();
+// export default Config.fromEnvironment();
