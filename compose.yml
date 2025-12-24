@@ -33,7 +33,7 @@ services:
 
   app:
     build: .
-    image: tokens:latest
+    image: jondotsoy/token-storage:latest
     ports:
       - 5454:5454
     volumes:
