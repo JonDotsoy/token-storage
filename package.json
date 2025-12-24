@@ -76,9 +76,10 @@
     "fmt": "prettier --write .",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:types": "tsc -p tsconfig.types.json",
-    "build": "bun run build:esm && bun run build:types",
+    "build": "make:src/package-version.ts && bun run build:esm && bun run build:types",
     "clean": "rm -rf lib",
-    "prepack": "bun run build"
+    "prepack": "bun run build",
+    "make:src/package-version.ts": "jq -r '.version as $version | \"export const packageVersion = \\( $version | @json );\"' package.json > src/package-version.ts | bunx prettier -w src/package-version.ts"
   },
   "optionalDependencies": {
     "@duckdb/node-api": "1.4.3-r.1"
