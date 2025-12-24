@@ -1,7 +1,6 @@
-import z from "zod";
 import type { TokenStorage } from "../token-storage.js";
-import * as schemas from "../../schemas.js";
 import { JsonRpcRouter } from "artur";
+import { httpTransportProtocol } from "../../utils/http-trasport-protocol.js";
 
 export class TokenStorageHTTPTransport {
   readonly jsonRpcRouter: JsonRpcRouter;
@@ -10,7 +9,7 @@ export class TokenStorageHTTPTransport {
     const jsonRpcRouter = new JsonRpcRouter();
 
     jsonRpcRouter.method(
-      "OAuthClient.put",
+      httpTransportProtocol.methods.OAuthClientPut.name,
       async (params) => {
         await instance.putOAuthClient(
           params.oauth_client_id,
@@ -19,41 +18,35 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: z.object({
-          oauth_client_id: z.string(),
-          oauthClient: schemas.OAuthClientInputSchema,
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.OAuthClientPut.input,
+        outputValidation: httpTransportProtocol.methods.OAuthClientPut.output,
       },
     );
 
     jsonRpcRouter.method(
-      "OAuthClient.get",
+      httpTransportProtocol.methods.OAuthClientGet.name,
       (params) => instance.getOAuthClient(params.oauth_client_id),
       {
-        inputValidation: z.object({
-          oauth_client_id: z.string(),
-        }),
-        outputValidation: schemas.OAuthClientSchema.nullable(),
+        inputValidation: httpTransportProtocol.methods.OAuthClientGet.input,
+        outputValidation: httpTransportProtocol.methods.OAuthClientGet.output,
       },
     );
 
     jsonRpcRouter.method(
-      "OAuthClient.delete",
+      httpTransportProtocol.methods.OAuthClientDelete.name,
       async (params) => {
         await instance.deleteOAuthClient(params.oauth_client_id);
         return true;
       },
       {
-        inputValidation: z.object({
-          oauth_client_id: z.string(),
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.OAuthClientDelete.input,
+        outputValidation:
+          httpTransportProtocol.methods.OAuthClientDelete.output,
       },
     );
 
     jsonRpcRouter.method(
-      "OAuthClient.list",
+      httpTransportProtocol.methods.OAuthClientList.name,
       async () => {
         const clients = [];
         for await (const client of instance.getOAuthClients()) {
@@ -62,52 +55,46 @@ export class TokenStorageHTTPTransport {
         return clients;
       },
       {
-        outputValidation: z.array(schemas.OAuthClientSchema),
+        inputValidation: httpTransportProtocol.methods.OAuthClientList.input,
+        outputValidation: httpTransportProtocol.methods.OAuthClientList.output,
       },
     );
 
     jsonRpcRouter.method(
-      "connection.put",
+      httpTransportProtocol.methods.ConnectionPut.name,
       async (params) => {
         await instance.putConnection(params.connection_id, params.connection);
         return true;
       },
       {
-        inputValidation: z.object({
-          connection_id: z.string(),
-          connection: schemas.ConnectionInputSchema,
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.ConnectionPut.input,
+        outputValidation: httpTransportProtocol.methods.ConnectionPut.output,
       },
     );
 
     jsonRpcRouter.method(
-      "connection.get",
+      httpTransportProtocol.methods.ConnectionGet.name,
       (params) => instance.getConnection(params.connection_id),
       {
-        inputValidation: z.object({
-          connection_id: z.string(),
-        }),
-        outputValidation: schemas.ConnectionSchema.nullable(),
+        inputValidation: httpTransportProtocol.methods.ConnectionGet.input,
+        outputValidation: httpTransportProtocol.methods.ConnectionGet.output,
       },
     );
 
     jsonRpcRouter.method(
-      "connection.delete",
+      httpTransportProtocol.methods.ConnectionDelete.name,
       async (params) => {
         await instance.deleteConnection(params.connection_id);
         return true;
       },
       {
-        inputValidation: z.object({
-          connection_id: z.string(),
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.ConnectionDelete.input,
+        outputValidation: httpTransportProtocol.methods.ConnectionDelete.output,
       },
     );
 
     jsonRpcRouter.method(
-      "connection.list",
+      httpTransportProtocol.methods.ConnectionList.name,
       async () => {
         const connections = [];
         for await (const connection of instance.getConnections()) {
@@ -116,52 +103,46 @@ export class TokenStorageHTTPTransport {
         return connections;
       },
       {
-        outputValidation: z.array(schemas.ConnectionSchema),
+        inputValidation: httpTransportProtocol.methods.ConnectionList.input,
+        outputValidation: httpTransportProtocol.methods.ConnectionList.output,
       },
     );
 
     jsonRpcRouter.method(
-      "credential.put",
+      httpTransportProtocol.methods.CredentialPut.name,
       async (params) => {
         await instance.putCredential(params.credential_id, params.credential);
         return true;
       },
       {
-        inputValidation: z.object({
-          credential_id: z.string(),
-          credential: schemas.CredentialInputSchema,
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.CredentialPut.input,
+        outputValidation: httpTransportProtocol.methods.CredentialPut.output,
       },
     );
 
     jsonRpcRouter.method(
-      "credential.get",
+      httpTransportProtocol.methods.CredentialGet.name,
       (params) => instance.getCredential(params.credential_id),
       {
-        inputValidation: z.object({
-          credential_id: z.string(),
-        }),
-        outputValidation: schemas.CredentialSchema.nullable(),
+        inputValidation: httpTransportProtocol.methods.CredentialGet.input,
+        outputValidation: httpTransportProtocol.methods.CredentialGet.output,
       },
     );
 
     jsonRpcRouter.method(
-      "credential.delete",
+      httpTransportProtocol.methods.CredentialDelete.name,
       async (params) => {
         await instance.deleteCredential(params.credential_id);
         return true;
       },
       {
-        inputValidation: z.object({
-          credential_id: z.string(),
-        }),
-        outputValidation: z.boolean(),
+        inputValidation: httpTransportProtocol.methods.CredentialDelete.input,
+        outputValidation: httpTransportProtocol.methods.CredentialDelete.output,
       },
     );
 
     jsonRpcRouter.method(
-      "credential.list",
+      httpTransportProtocol.methods.CredentialList.name,
       async () => {
         const credentials = [];
         for await (const credential of instance.getCredentials()) {
@@ -170,29 +151,32 @@ export class TokenStorageHTTPTransport {
         return credentials;
       },
       {
-        outputValidation: z.array(schemas.CredentialSchema),
+        inputValidation: httpTransportProtocol.methods.CredentialList.input,
+        outputValidation: httpTransportProtocol.methods.CredentialList.output,
       },
     );
 
-    jsonRpcRouter.method("stats.get", () => instance.getStats(), {
-      outputValidation: schemas.StatsSchema,
-    });
+    jsonRpcRouter.method(
+      httpTransportProtocol.methods.StatsGet.name,
+      () => instance.getStats(),
+      {
+        inputValidation: httpTransportProtocol.methods.StatsGet.input,
+        outputValidation: httpTransportProtocol.methods.StatsGet.output,
+      },
+    );
 
     jsonRpcRouter.method(
-      "auth.getURL",
+      httpTransportProtocol.methods.AuthGetURL.name,
       (params) =>
         instance.getAuthURL(params.connection_id, params.redirect_uri),
       {
-        inputValidation: z.object({
-          connection_id: z.string(),
-          redirect_uri: z.string(),
-        }),
-        outputValidation: z.string(),
+        inputValidation: httpTransportProtocol.methods.AuthGetURL.input,
+        outputValidation: httpTransportProtocol.methods.AuthGetURL.output,
       },
     );
 
     jsonRpcRouter.method(
-      "auth.exchangeCode",
+      httpTransportProtocol.methods.AuthExchangeCode.name,
       (params) =>
         instance.exchangeCode(
           params.connection_id,
@@ -200,25 +184,17 @@ export class TokenStorageHTTPTransport {
           params.code,
         ),
       {
-        inputValidation: z.object({
-          connection_id: z.string(),
-          redirect_uri: z.string(),
-          code: z.string(),
-        }),
-        outputValidation: z.object({
-          credential_id: z.string(),
-        }),
+        inputValidation: httpTransportProtocol.methods.AuthExchangeCode.input,
+        outputValidation: httpTransportProtocol.methods.AuthExchangeCode.output,
       },
     );
 
     jsonRpcRouter.method(
-      "token.get",
+      httpTransportProtocol.methods.TokenGet.name,
       (params) => instance.getToken(params.credential_id),
       {
-        inputValidation: z.object({
-          credential_id: z.string(),
-        }),
-        outputValidation: schemas.TokenSchema,
+        inputValidation: httpTransportProtocol.methods.TokenGet.input,
+        outputValidation: httpTransportProtocol.methods.TokenGet.output,
       },
     );
 

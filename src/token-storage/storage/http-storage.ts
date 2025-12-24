@@ -1,5 +1,4 @@
 import z from "zod";
-import * as schemas from "../../schemas.js";
 import type {
   Connection,
   ConnectionInput,
@@ -10,6 +9,7 @@ import type {
   Stats,
   StorageInstance,
 } from "./dtos/storage-instance.dto.js";
+import { httpTransportProtocol } from "../../utils/http-trasport-protocol.js";
 
 const jsonRpcResponseSchema = z.union([
   z.object({
@@ -36,19 +36,6 @@ export class HTTPStorageInstanceError extends Error {
   }
 }
 
-const requestJson = (
-  body: any,
-  requestInfo: string,
-  init: Omit<RequestInit, "body"> | undefined,
-) => {
-  const request = new Request(requestInfo, {
-    ...init,
-    body: JSON.stringify(body),
-  });
-  request.headers.append("Content-Type", "application/json");
-  return request;
-};
-
 type Middleware = (
   fetch: (request: Request) => Promise<Response>,
 ) => (request: Request) => Promise<Response>;
@@ -73,121 +60,69 @@ export class HTTPStorage implements StorageInstance {
     return await this.#fetch(request);
   }
 
+  prepareMethod<I extends z.ZodTypeAny, O extends z.ZodTypeAny>(methodDef: {
+    name: string;
+    input: I;
+    output: O;
+  }) {
+    return async (input: z.infer<I>): Promise<z.infer<O>> => {
+      const request = new Request(`${this.url}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: this.#secuenceId++,
+          jsonrpc: "2.0",
+          method: methodDef.name,
+          params: input,
+        }),
+      });
+      const response = await this.fetch(request);
+      if (!response.ok)
+        throw new HTTPStorageInstanceError(
+          request,
+          response,
+          await response.text(),
+        );
+      const jsonRpcResponse = jsonRpcResponseSchema.parse(
+        await response.json(),
+      );
+      if ("error" in jsonRpcResponse) {
+        throw new HTTPStorageInstanceError(
+          request,
+          response,
+          `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
+        );
+      }
+      return jsonRpcResponse.result as any;
+    };
+  }
+
   async putOAuthClient(
     oauth_client_id: string,
     oauthClient: OAuthClientInput,
   ): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "OAuthClient.put",
-        params: { oauth_client_id, oauthClient },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.OAuthClientPut,
+    );
+    await method({ oauth_client_id, oauthClient });
   }
   async getOAuthClient(oauth_client_id: string): Promise<OAuthClient | null> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "OAuthClient.get",
-        params: { oauth_client_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return jsonRpcResponse.result === null
-      ? null
-      : schemas.OAuthClientSchema.parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.OAuthClientGet,
+    );
+    return await method({ oauth_client_id });
   }
   async deleteOAuthClient(oauth_client_id: string): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "OAuthClient.delete",
-        params: { oauth_client_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.OAuthClientDelete,
+    );
+    await method({ oauth_client_id });
   }
   async *getOAuthClients(): AsyncIterable<OAuthClient> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "OAuthClient.list",
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    const clients = z
-      .array(schemas.OAuthClientSchema)
-      .parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.OAuthClientList,
+    );
+    const clients = await method(undefined);
     for (const client of clients) {
       yield client;
     }
@@ -196,117 +131,28 @@ export class HTTPStorage implements StorageInstance {
     connection_id: string,
     connection: ConnectionInput,
   ): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "connection.put",
-        params: { connection_id, connection },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.ConnectionPut,
+    );
+    await method({ connection_id, connection });
   }
   async getConnection(connection_id: string): Promise<Connection | null> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "connection.get",
-        params: { connection_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return jsonRpcResponse.result === null
-      ? null
-      : schemas.ConnectionSchema.parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.ConnectionGet,
+    );
+    return await method({ connection_id });
   }
   async deleteConnection(connection_id: string): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "connection.delete",
-        params: { connection_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.ConnectionDelete,
+    );
+    await method({ connection_id });
   }
   async *getConnections(): AsyncIterable<Connection> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "connection.list",
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    const connections = z
-      .array(schemas.ConnectionSchema)
-      .parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.ConnectionList,
+    );
+    const connections = await method(undefined);
     for (const connection of connections) {
       yield connection;
     }
@@ -315,239 +161,55 @@ export class HTTPStorage implements StorageInstance {
     credential_id: string,
     credential: CredentialInput,
   ): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "credential.put",
-        params: { credential_id, credential },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.CredentialPut,
+    );
+    await method({ credential_id, credential });
   }
   async getCredential(credential_id: string): Promise<Credential | null> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "credential.get",
-        params: { credential_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return jsonRpcResponse.result === null
-      ? null
-      : schemas.CredentialSchema.parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.CredentialGet,
+    );
+    return await method({ credential_id });
   }
   async deleteCredential(credential_id: string): Promise<void> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "credential.delete",
-        params: { credential_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.CredentialDelete,
+    );
+    await method({ credential_id });
   }
   async *getCredentials(): AsyncIterable<Credential> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "credential.list",
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    const credentials = z
-      .array(schemas.CredentialSchema)
-      .parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.CredentialList,
+    );
+    const credentials = await method(undefined);
     for (const credential of credentials) {
       yield credential;
     }
   }
   async getStats(): Promise<Stats> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "stats.get",
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return schemas.StatsSchema.parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(httpTransportProtocol.methods.StatsGet);
+    return await method(undefined);
   }
   async getAuthURL(
     connection_id: string,
     redirect_uri: string,
   ): Promise<string> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "auth.getURL",
-        params: { connection_id, redirect_uri },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return z.string().parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(httpTransportProtocol.methods.AuthGetURL);
+    return await method({ connection_id, redirect_uri });
   }
   async exchangeCode(
     connection_id: string,
     redirect_uri: string,
     code: string,
   ): Promise<{ credential_id: string }> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "auth.exchangeCode",
-        params: { connection_id, redirect_uri, code },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return z
-      .object({ credential_id: z.string() })
-      .parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(
+      httpTransportProtocol.methods.AuthExchangeCode,
+    );
+    return await method({ connection_id, redirect_uri, code });
   }
   async getToken(credential_id: string): Promise<Credential["token"]> {
-    const request = new Request(`${this.url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: this.#secuenceId++,
-        jsonrpc: "2.0",
-        method: "token.get",
-        params: { credential_id },
-      }),
-    });
-    const response = await this.fetch(request);
-    if (!response.ok)
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        await response.text(),
-      );
-    const jsonRpcResponse = jsonRpcResponseSchema.parse(await response.json());
-    if ("error" in jsonRpcResponse) {
-      throw new HTTPStorageInstanceError(
-        request,
-        response,
-        `${jsonRpcResponse.error.code} ${jsonRpcResponse.error.message} ${jsonRpcResponse.error.data}`,
-      );
-    }
-    return schemas.TokenSchema.parse(jsonRpcResponse.result);
+    const method = this.prepareMethod(httpTransportProtocol.methods.TokenGet);
+    return await method({ credential_id });
   }
 }
