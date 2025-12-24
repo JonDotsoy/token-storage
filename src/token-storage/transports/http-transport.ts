@@ -18,7 +18,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.OAuthClientPut.input,
+        inputValidation:
+          httpTransportProtocol.methods.OAuthClientPut.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.OAuthClientPut.output,
       },
     );
@@ -27,7 +28,8 @@ export class TokenStorageHTTPTransport {
       httpTransportProtocol.methods.OAuthClientGet.name,
       (params) => instance.getOAuthClient(params.oauth_client_id),
       {
-        inputValidation: httpTransportProtocol.methods.OAuthClientGet.input,
+        inputValidation:
+          httpTransportProtocol.methods.OAuthClientGet.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.OAuthClientGet.output,
       },
     );
@@ -39,7 +41,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.OAuthClientDelete.input,
+        inputValidation:
+          httpTransportProtocol.methods.OAuthClientDelete.input ?? undefined,
         outputValidation:
           httpTransportProtocol.methods.OAuthClientDelete.output,
       },
@@ -55,7 +58,8 @@ export class TokenStorageHTTPTransport {
         return clients;
       },
       {
-        inputValidation: httpTransportProtocol.methods.OAuthClientList.input,
+        inputValidation:
+          httpTransportProtocol.methods.OAuthClientList.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.OAuthClientList.output,
       },
     );
@@ -67,7 +71,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.ConnectionPut.input,
+        inputValidation:
+          httpTransportProtocol.methods.ConnectionPut.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.ConnectionPut.output,
       },
     );
@@ -76,7 +81,8 @@ export class TokenStorageHTTPTransport {
       httpTransportProtocol.methods.ConnectionGet.name,
       (params) => instance.getConnection(params.connection_id),
       {
-        inputValidation: httpTransportProtocol.methods.ConnectionGet.input,
+        inputValidation:
+          httpTransportProtocol.methods.ConnectionGet.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.ConnectionGet.output,
       },
     );
@@ -88,7 +94,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.ConnectionDelete.input,
+        inputValidation:
+          httpTransportProtocol.methods.ConnectionDelete.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.ConnectionDelete.output,
       },
     );
@@ -103,7 +110,8 @@ export class TokenStorageHTTPTransport {
         return connections;
       },
       {
-        inputValidation: httpTransportProtocol.methods.ConnectionList.input,
+        inputValidation:
+          httpTransportProtocol.methods.ConnectionList.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.ConnectionList.output,
       },
     );
@@ -115,7 +123,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.CredentialPut.input,
+        inputValidation:
+          httpTransportProtocol.methods.CredentialPut.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.CredentialPut.output,
       },
     );
@@ -124,7 +133,8 @@ export class TokenStorageHTTPTransport {
       httpTransportProtocol.methods.CredentialGet.name,
       (params) => instance.getCredential(params.credential_id),
       {
-        inputValidation: httpTransportProtocol.methods.CredentialGet.input,
+        inputValidation:
+          httpTransportProtocol.methods.CredentialGet.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.CredentialGet.output,
       },
     );
@@ -136,7 +146,8 @@ export class TokenStorageHTTPTransport {
         return true;
       },
       {
-        inputValidation: httpTransportProtocol.methods.CredentialDelete.input,
+        inputValidation:
+          httpTransportProtocol.methods.CredentialDelete.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.CredentialDelete.output,
       },
     );
@@ -151,7 +162,8 @@ export class TokenStorageHTTPTransport {
         return credentials;
       },
       {
-        inputValidation: httpTransportProtocol.methods.CredentialList.input,
+        inputValidation:
+          httpTransportProtocol.methods.CredentialList.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.CredentialList.output,
       },
     );
@@ -160,7 +172,8 @@ export class TokenStorageHTTPTransport {
       httpTransportProtocol.methods.StatsGet.name,
       () => instance.getStats(),
       {
-        inputValidation: httpTransportProtocol.methods.StatsGet.input,
+        inputValidation:
+          httpTransportProtocol.methods.StatsGet.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.StatsGet.output,
       },
     );
@@ -170,7 +183,8 @@ export class TokenStorageHTTPTransport {
       (params) =>
         instance.getAuthURL(params.connection_id, params.redirect_uri),
       {
-        inputValidation: httpTransportProtocol.methods.AuthGetURL.input,
+        inputValidation:
+          httpTransportProtocol.methods.AuthGetURL.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.AuthGetURL.output,
       },
     );
@@ -184,7 +198,8 @@ export class TokenStorageHTTPTransport {
           params.code,
         ),
       {
-        inputValidation: httpTransportProtocol.methods.AuthExchangeCode.input,
+        inputValidation:
+          httpTransportProtocol.methods.AuthExchangeCode.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.AuthExchangeCode.output,
       },
     );
@@ -193,7 +208,8 @@ export class TokenStorageHTTPTransport {
       httpTransportProtocol.methods.TokenGet.name,
       (params) => instance.getToken(params.credential_id),
       {
-        inputValidation: httpTransportProtocol.methods.TokenGet.input,
+        inputValidation:
+          httpTransportProtocol.methods.TokenGet.input ?? undefined,
         outputValidation: httpTransportProtocol.methods.TokenGet.output,
       },
     );

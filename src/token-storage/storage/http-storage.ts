@@ -62,7 +62,7 @@ export class HTTPStorage implements StorageInstance {
 
   prepareMethod<I extends z.ZodTypeAny, O extends z.ZodTypeAny>(methodDef: {
     name: string;
-    input: I;
+    input: I | undefined | null;
     output: O;
   }) {
     return async (input: z.infer<I>): Promise<z.infer<O>> => {

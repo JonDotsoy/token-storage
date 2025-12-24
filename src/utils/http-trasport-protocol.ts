@@ -3,7 +3,7 @@ import z from "zod";
 
 interface Method {
   name: string;
-  input: z.ZodTypeAny;
+  input: z.ZodTypeAny | null;
   output: z.ZodTypeAny;
 }
 
@@ -35,7 +35,7 @@ export namespace httpTransportProtocol {
     } as const satisfies Method;
     export const OAuthClientList = {
       name: "OAuthClient.list",
-      input: z.object({}).optional(),
+      input: null,
       output: z.array(schemas.OAuthClientSchema),
     } as const satisfies Method;
 
@@ -63,7 +63,7 @@ export namespace httpTransportProtocol {
     } as const satisfies Method;
     export const ConnectionList = {
       name: "connection.list",
-      input: z.object({}).optional(),
+      input: null,
       output: z.array(schemas.ConnectionSchema),
     } as const satisfies Method;
 
@@ -91,13 +91,13 @@ export namespace httpTransportProtocol {
     } as const satisfies Method;
     export const CredentialList = {
       name: "credential.list",
-      input: z.object({}).optional(),
+      input: null,
       output: z.array(schemas.CredentialSchema),
     } as const satisfies Method;
 
     export const StatsGet = {
       name: "stats.get",
-      input: z.object({}).optional(),
+      input: null,
       output: schemas.StatsSchema,
     } as const satisfies Method;
 
