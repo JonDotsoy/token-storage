@@ -1,12 +1,20 @@
 import type { TokenStorage } from "../token-storage.js";
 import { JsonRpcRouter } from "artur";
+import { type JsonRpcHandler } from "artur/json-rpc";
 import { httpTransportProtocol } from "../../utils/http-trasport-protocol.js";
+
+type JsonRpcMiddleware = (next: JsonRpcHandler) => JsonRpcHandler;
 
 export class TokenStorageHTTPTransport {
   readonly jsonRpcRouter: JsonRpcRouter;
 
-  constructor(instance: TokenStorage) {
-    const jsonRpcRouter = new JsonRpcRouter();
+  constructor(
+    instance: TokenStorage,
+    options?: { jsonRpcMiddlewares?: JsonRpcMiddleware[] },
+  ) {
+    const jsonRpcRouter = new JsonRpcRouter({
+      middlewares: [...(options?.jsonRpcMiddlewares ?? [])],
+    });
 
     jsonRpcRouter.method(
       httpTransportProtocol.methods.OAuthClientPut.name,
