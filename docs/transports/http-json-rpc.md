@@ -10,12 +10,6 @@ El `TokenStorageHTTPTransport` expone una instancia de `TokenStorage` a través 
 - **Introspección**: Soporta `system.listMethods` para descubrir métodos disponibles
 - **Framework agnóstico**: Funciona con cualquier servidor HTTP (Express, Bun, Node.js)
 
-## Instalación
-
-```bash
-bun add artur zod
-```
-
 ## Uso Básico
 
 ### Con Bun
@@ -639,51 +633,6 @@ console.log(stats);
 ```
 
 Ver [docs/data-sources/http-storage.md](../data-sources/http-storage.md) para más detalles sobre el cliente.
-
-## Deployment
-
-### Docker
-
-```dockerfile
-FROM oven/bun:1
-
-WORKDIR /app
-
-COPY package.json bun.lock ./
-RUN bun install
-
-COPY . .
-
-EXPOSE 5454
-
-CMD ["bun", "run", "server.ts"]
-```
-
-```yaml
-# docker-compose.yml
-version: "3.8"
-services:
-  token-storage:
-    build: .
-    ports:
-      - "5454:5454"
-    environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/tokens
-      API_TOKEN: your-secret-token
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: tokens
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
 
 ## Ventajas
 
