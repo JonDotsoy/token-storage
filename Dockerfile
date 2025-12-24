@@ -47,11 +47,7 @@ ENV NODE_ENV=production
 ENV PORT=5454
 ENV HOST=0.0.0.0
 ENV CORS_ORIGIN=*
-ENV DB_PATH=/data/db.duckdb
-ENV CORS_ORIGIN=*
-
-# RUN mkdir /data
-VOLUME ["/data"]
+ENV DB_URI=
 
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD bun src/healthcheck.ts
