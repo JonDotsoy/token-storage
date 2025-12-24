@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/JonDotsoy/token-storage/compare/v0.2.0...v0.3.0) (2025-12-24)
+
+
+### Features
+
+* **docker:** add container health check endpoint and monitoring ([bbebf02](https://github.com/JonDotsoy/token-storage/commit/bbebf0271a56e6f17ff0aa30fe8a8513665245b9))
+* **serve:** add HTTP transport protocol version header ([ae59902](https://github.com/JonDotsoy/token-storage/commit/ae59902f90c2317ca3968e009640c2ffd9d815b7))
+
 ## [0.2.0](https://github.com/JonDotsoy/token-storage/compare/v0.1.3...v0.2.0) (2025-12-24)
 
 
