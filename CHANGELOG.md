@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/JonDotsoy/token-storage/compare/v0.3.0...v0.3.1) (2025-12-24)
+
+
+### Miscellaneous Chores
+
+* release 0.3.1 ([2be7235](https://github.com/JonDotsoy/token-storage/commit/2be7235c9facbc84b957d100a41a97ab0be67af8))
+
 ## [0.3.0](https://github.com/JonDotsoy/token-storage/compare/v0.2.0...v0.3.0) (2025-12-24)
 
 
