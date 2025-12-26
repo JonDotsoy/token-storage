@@ -19,7 +19,7 @@ export class Metrics {
   httpStartTimer: () => (
     method: string,
     pathname: string,
-    statusCode: number,
+    statusCode: string,
   ) => void;
   rpcStartTimer: () => (method: string, status: "ERROR" | "SUCCESS") => void;
   registry: p.Registry<"text/plain; version=0.0.4; charset=utf-8">;
@@ -95,7 +95,7 @@ export class Metrics {
     this.httpStartTimer = () => {
       const end = http_request_duration_seconds.startTimer();
       const endSummary = http_request_duration_seconds_summary?.startTimer();
-      return (method: string, pathname: string, statusCode: number) => {
+      return (method: string, pathname: string, statusCode: string) => {
         end({
           method,
           pathname,
