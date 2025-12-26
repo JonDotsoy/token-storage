@@ -10,20 +10,45 @@ import { Client } from "pg";
 import { PostgresQLStorage } from "./token-storage/storage/postgresql-storage.js";
 // import { DuckDBStorage } from "./token-storage/storage/duckdb-storage.js";
 import { HTTPStorage } from "./token-storage/storage/http-storage.js";
+import * as Prometheus from "prom-client";
+import { Metrics } from "./utils/metrics.js";
 
 const config = Config.fromEnvironment();
+
+const metrics = new Metrics({
+  percentiles: config.server.metrics.summaryPercentiles,
+  buckets: config.server.metrics.histogramBuckets,
+  ageBuckets: config.server.metrics.ageBuckets,
+  maxAgeSeconds: config.server.metrics.maxAgeSeconds,
+  collectDefaultMetrics: true,
+  enableSummary: config.server.metrics.enableSummary,
+});
+
+const percentiles = config.server.metrics.summaryPercentiles;
+
+const register = new Prometheus.Registry();
+
+Prometheus.collectDefaultMetrics({ register });
 
 const startTime = Temporal.Now.instant();
 
 const router = new Router({
   middlewares: [
     (fetch) => async (req) => {
-      const res = await fetch(req);
-      res.headers.append(
-        "X-TokenStorage-Api-Version",
-        httpTransportProtocol.version,
-      );
-      return res;
+      const s = metrics.httpStartTimer();
+      let statusCode: null | number = null;
+      try {
+        const res = await fetch(req);
+        statusCode = res.status;
+        res.headers.append(
+          "X-TokenStorage-Api-Version",
+          httpTransportProtocol.version,
+        );
+        return res;
+      } finally {
+        const { pathname } = new URL(req.url);
+        s(req.method, pathname, statusCode ?? NaN);
+      }
     },
   ],
 });
@@ -47,9 +72,32 @@ const tokenStorage = new TokenStorage({
   db: dbFactory(config.database.uri),
 });
 
-const transport = new TokenStorageHTTPTransport(tokenStorage);
+const transport = new TokenStorageHTTPTransport(tokenStorage, {
+  jsonRpcMiddlewares: [
+    (next) => {
+      return async (params, request, event) => {
+        const s = metrics.rpcStartTimer();
+        try {
+          const r = await next(params, request, event);
+          console.log("r:", r);
+          return r;
+        } finally {
+          s(request.method, "SUCCESS");
+        }
+      };
+    },
+  ],
+});
 
 router.route("POST", "/rpc", { fetch: transport.jsonRpcRouter.fetch });
+
+router.route("GET", "/metrics", async () => {
+  return new Response(await register.metrics(), {
+    headers: {
+      "Content-Type": register.contentType,
+    },
+  });
+});
 
 router.route("ALL", "/health", () =>
   Response.json({
