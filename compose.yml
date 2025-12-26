@@ -1,13 +1,4 @@
 services:
-  oauth-dummy:
-    image: oven/bun:1.3.4
-    volumes:
-      - .:/app
-    command: ["bun", "/app/tests/"]
-
-  db:
-    image: duckdb/duckdb:latest
-
   postgres:
     image: postgres:16-alpine
     environment:
@@ -25,19 +16,48 @@ services:
       target: testing
     image: tokens:latest
 
-  build:
-    build:
-      context: .
-      target: build
-    image: tokens:latest
-
   app:
+    mem_limit: 68m
     build: .
     image: jondotsoy/token-storage:latest
     ports:
       - 5454:5454
     volumes:
       - ./db:/data
+    environment:
+      - METRICS_MAX_AGE_SECONDS=10
+      - METRICS_AGE_BUCKETS=2
+
+  prometheus:
+    mem_limit: 68m
+    image: prom/prometheus:latest # Use the official image
+    depends_on:
+      - app
+    ports:
+      - "9090:9090" # Map port 9090 on the host to 9090 in the container
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # Mount the config file
+      # - prometheus_data:/prometheus # Mount a named volume for data persistence
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+
+  grafana:
+    mem_limit: 128m
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - "9091:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: true
+    #   - GF_SECURITY_ADMIN_PASSWORD=your_new_password
 
 volumes:
   postgres_data:
+  grafana_data:
+  prometheus_data: {}
