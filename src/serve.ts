@@ -92,11 +92,7 @@ const transport = new TokenStorageHTTPTransport(tokenStorage, {
 router.route("POST", "/rpc", { fetch: transport.jsonRpcRouter.fetch });
 
 router.route("GET", "/metrics", async () => {
-  return new Response(await register.metrics(), {
-    headers: {
-      "Content-Type": register.contentType,
-    },
-  });
+  return await metrics.toResponse();
 });
 
 router.route("ALL", "/health", () =>
