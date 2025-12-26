@@ -19,7 +19,7 @@ export class Metrics {
   httpStartTimer: () => (
     method: string,
     pathname: string,
-    statusCode: string,
+    statusCode: `${"1" | "2" | "3" | "4" | "5"}xx` | "unknown",
   ) => void;
   rpcStartTimer: () => (method: string, status: "ERROR" | "SUCCESS") => void;
   registry: p.Registry<"text/plain; version=0.0.4; charset=utf-8">;

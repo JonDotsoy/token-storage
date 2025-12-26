@@ -24,7 +24,9 @@ const metrics = new Metrics({
   enableSummary: config.server.metrics.enableSummary,
 });
 
-const parseStatusCode = (statusCode: number | null) => {
+const parseStatusCode = (
+  statusCode: number | null,
+): `${"1" | "2" | "3" | "4" | "5"}xx` | "unknown" => {
   if (statusCode === null) return "unknown";
   if (statusCode >= 100 && statusCode < 200) return "1xx";
   if (statusCode >= 200 && statusCode < 300) return "2xx";
