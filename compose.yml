@@ -27,6 +27,7 @@ services:
     environment:
       - METRICS_MAX_AGE_SECONDS=10
       - METRICS_AGE_BUCKETS=2
+      - METRICS_ENABLE_SUMMARY=true
 
   prometheus:
     mem_limit: 68m
