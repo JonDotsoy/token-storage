@@ -94,7 +94,7 @@ export class Config {
         port: 5454,
         hostname: "localhost",
         metrics: {
-          enabled: true,
+          enabled: false,
           maxAgeSeconds: 600, // 10 minutos
           ageBuckets: 5,
           summaryPercentiles: Array.from<Percentile, number>(
