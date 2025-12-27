@@ -98,7 +98,7 @@ export class Config {
             (v) => parsePercentile(v)!,
           ),
           histogramBuckets: Array.from<Duration, number>(
-            ["50ms", "100ms", "250ms", "500ms", "1s", "2.5s", "5s", "10s"],
+            ["10ms", "50ms", "100ms", "200ms", "500ms", "1s", "1.5s", "2s"],
             (v) => parseSecond(v)!,
           ),
           enableSummary: false,
