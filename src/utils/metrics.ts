@@ -4,6 +4,7 @@ import { parseSecond, type Duration } from "./duration";
 import { parsePercentile, type Percentile } from "./percentil";
 
 export type MetricsConfigs = {
+  enabled?: boolean;
   registers?: Registry[];
   /** Percentile values to track for summary metrics (e.g., [0.5, 0.9, 0.95, 0.99]) */
   percentiles?: number[];
@@ -26,9 +27,10 @@ export class Metrics {
 
   constructor(configs: MetricsConfigs = {}) {
     const {
+      enabled = false,
       registers = [],
       buckets = Array.from<Duration, number>(
-        ["1ms", "10ms", "100ms", "1s", "10s", "30s"],
+        ["1ms", "10ms", "100ms", "250ms", "500ms", "1s", "2s", "5s"],
         (v) => parseSecond(v)!,
       ),
       percentiles = Array.from<Percentile, number>(
@@ -52,51 +54,57 @@ export class Metrics {
       reg.registerMetric = registry.registerMetric.bind(registry);
     });
 
-    const rpc_duration_seconds = new Histogram({
-      name: "rpc_duration_seconds",
-      help: "Duration of RPC calls in seconds",
-      labelNames: ["method", "status"],
-      buckets,
-      registers: [registry, ...registers],
-    });
-
-    const rpc_duration_seconds_summary = enableSummary
-      ? new Summary({
-          name: "rpc_duration_seconds_summary",
-          help: "Summary of RPC call durations in seconds",
+    const rpc_duration_seconds = enabled
+      ? new Histogram({
+          name: "rpc_duration_seconds",
+          help: "Duration of RPC calls in seconds",
           labelNames: ["method", "status"],
-          percentiles,
-          maxAgeSeconds,
-          ageBuckets,
+          buckets,
           registers: [registry, ...registers],
         })
       : null;
 
-    const http_request_duration_seconds = new Histogram({
-      name: "http_request_duration_seconds",
-      help: "Duration of HTTP requests in seconds",
-      labelNames: ["method", "pathname", "statusCode"],
-      buckets,
-      registers: [registry, ...registers],
-    });
+    const rpc_duration_seconds_summary =
+      enabled && enableSummary
+        ? new Summary({
+            name: "rpc_duration_seconds_summary",
+            help: "Summary of RPC call durations in seconds",
+            labelNames: ["method", "status"],
+            percentiles,
+            maxAgeSeconds,
+            ageBuckets,
+            registers: [registry, ...registers],
+          })
+        : null;
 
-    const http_request_duration_seconds_summary = enableSummary
-      ? new Summary({
-          name: "http_request_duration_seconds_summary",
-          help: "Summary of HTTP request durations in seconds",
+    const http_request_duration_seconds = enabled
+      ? new Histogram({
+          name: "http_request_duration_seconds",
+          help: "Duration of HTTP requests in seconds",
           labelNames: ["method", "pathname", "statusCode"],
-          percentiles,
-          maxAgeSeconds,
-          ageBuckets,
+          buckets,
           registers: [registry, ...registers],
         })
       : null;
+
+    const http_request_duration_seconds_summary =
+      enabled && enableSummary
+        ? new Summary({
+            name: "http_request_duration_seconds_summary",
+            help: "Summary of HTTP request durations in seconds",
+            labelNames: ["method", "pathname", "statusCode"],
+            percentiles,
+            maxAgeSeconds,
+            ageBuckets,
+            registers: [registry, ...registers],
+          })
+        : null;
 
     this.httpStartTimer = () => {
-      const end = http_request_duration_seconds.startTimer();
+      const end = http_request_duration_seconds?.startTimer();
       const endSummary = http_request_duration_seconds_summary?.startTimer();
       return (method: string, pathname: string, statusCode: string) => {
-        end({
+        end?.({
           method,
           pathname,
           statusCode,
@@ -110,10 +118,10 @@ export class Metrics {
     };
 
     this.rpcStartTimer = () => {
-      const end = rpc_duration_seconds.startTimer();
+      const end = rpc_duration_seconds?.startTimer();
       const endSummary = rpc_duration_seconds_summary?.startTimer();
       return (method: string, status: "ERROR" | "SUCCESS") => {
-        end({
+        end?.({
           method,
           status,
         });
