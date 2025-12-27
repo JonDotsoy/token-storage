@@ -16,6 +16,7 @@ import { Metrics } from "./utils/metrics.js";
 const config = Config.fromEnvironment();
 
 const metrics = new Metrics({
+  enabled: config.server.metrics.enabled,
   percentiles: config.server.metrics.summaryPercentiles,
   buckets: config.server.metrics.histogramBuckets,
   ageBuckets: config.server.metrics.ageBuckets,
@@ -42,26 +43,25 @@ Prometheus.collectDefaultMetrics({ register });
 
 const startTime = Temporal.Now.instant();
 
-const router = new Router({
-  middlewares: [
-    (fetch) => async (req) => {
-      const s = metrics.httpStartTimer();
-      let statusCode: null | number = null;
-      try {
-        const res = await fetch(req);
-        statusCode = res.status;
-        res.headers.append(
-          "X-TokenStorage-Api-Version",
-          httpTransportProtocol.version,
-        );
-        return res;
-      } finally {
-        const { pathname } = new URL(req.url);
-        s(req.method, pathname, parseStatusCode(statusCode));
-      }
-    },
-  ],
-});
+const metricsMiddleware =
+  (fetch: (request: Request) => Promise<Response>) => async (req: Request) => {
+    const s = metrics.httpStartTimer();
+    let statusCode: null | number = null;
+    try {
+      const res = await fetch(req);
+      statusCode = res.status;
+      res.headers.append(
+        "X-TokenStorage-Api-Version",
+        httpTransportProtocol.version,
+      );
+      return res;
+    } finally {
+      const { pathname } = new URL(req.url);
+      s(req.method, pathname, parseStatusCode(statusCode));
+    }
+  };
+
+const router = new Router();
 
 const dbFactory = (uri: string | null): StorageInstance | undefined => {
   if (uri === null) return undefined;
@@ -99,7 +99,10 @@ const transport = new TokenStorageHTTPTransport(tokenStorage, {
   ],
 });
 
-router.route("POST", "/rpc", { fetch: transport.jsonRpcRouter.fetch });
+router.route("POST", "/rpc", {
+  middlewares: [metricsMiddleware],
+  fetch: transport.jsonRpcRouter.fetch,
+});
 
 router.route("GET", "/metrics", async () => {
   return await metrics.toResponse();
