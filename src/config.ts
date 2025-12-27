@@ -9,6 +9,7 @@ import { parseSecond, type Duration } from "./utils/duration.js";
 const env = (name: string) => pick(process.env).property(name);
 
 interface MetricsConfig {
+  enabled: boolean;
   maxAgeSeconds: number;
   ageBuckets: number;
   summaryPercentiles: number[];
@@ -52,6 +53,8 @@ export class Config {
       port: options?.server?.port ?? defaults.server.port,
       hostname: options?.server?.hostname ?? defaults.server.hostname,
       metrics: {
+        enabled:
+          options?.server?.metrics?.enabled ?? defaults.server.metrics.enabled,
         maxAgeSeconds:
           options?.server?.metrics?.maxAgeSeconds ??
           defaults.server.metrics.maxAgeSeconds,
@@ -91,6 +94,7 @@ export class Config {
         port: 5454,
         hostname: "localhost",
         metrics: {
+          enabled: true,
           maxAgeSeconds: 600, // 10 minutos
           ageBuckets: 5,
           summaryPercentiles: Array.from<Percentile, number>(
@@ -168,6 +172,13 @@ export class Config {
           const normalized = v.toLowerCase();
           return normalized === "on" || normalized === "true";
         }).value ?? null;
+    const metricsEnabled =
+      env("METRICS_ENABLED")
+        ?.string()
+        ?.pipe((v) => {
+          const normalized = v.toLowerCase();
+          return normalized === "on" || normalized === "true";
+        }).value ?? null;
     const defaultValues = Config.defaultValues();
 
     return new Config({
@@ -178,6 +189,10 @@ export class Config {
           hostname ??
           defaultValues.server.hostname,
         metrics: {
+          enabled:
+            options?.server?.metrics?.enabled ??
+            metricsEnabled ??
+            defaultValues.server.metrics.enabled,
           maxAgeSeconds:
             options?.server?.metrics?.maxAgeSeconds ??
             metricsMaxAgeSeconds ??
