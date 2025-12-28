@@ -48,6 +48,7 @@ ENV PORT=5454
 ENV HOST=0.0.0.0
 ENV CORS_ORIGIN=*
 ENV DB_URI=
+ENV TOKENSTORAGE_TELEMETRY_DISABLED=true
 
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD bun src/healthcheck.ts
