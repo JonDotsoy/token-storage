@@ -38,6 +38,10 @@
       "import": "./lib/esm/token-storage/storage/http-storage.js",
       "types": "./lib/types/token-storage/storage/http-storage.d.ts"
     },
+    "./storage/sqlite-storage": {
+      "import": "./lib/esm/token-storage/storage/sqlite-storage.js",
+      "types": "./lib/types/token-storage/storage/sqlite-storage.d.ts"
+    },
     "./storage/dtos/storage-instance.dto": {
       "import": "./lib/esm/token-storage/storage/dtos/storage-instance.dto.js",
       "types": "./lib/types/token-storage/storage/dtos/storage-instance.dto.d.ts"
