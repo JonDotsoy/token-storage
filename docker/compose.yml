@@ -1,24 +1,20 @@
 services:
-  postgres:
-    image: postgres:16-alpine
+  telemetry:
+    image: jondotsoy/telemetry
+    mem_limit: 68m
+    cpus: 0.5
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
+      # - PUBLIC_URL=
+      - TELEMETRY_DEBUG=true
+      - GOOGLE_ANALYTICS_MODE=debug
+      - GOOGLE_ANALYTICS_API_SECRET=ILU_9Q3aQOW8UnZVgpxI6Q
+      - GOOGLE_ANALYTICS_MEASUREMENT_ID=G-6EBEFK218R
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  testing:
-    build:
-      context: .
-      target: testing
-    image: tokens:latest
+      - 8080:3000
 
   app:
     mem_limit: 68m
-    build: .
+    build: ..
     image: jondotsoy/token-storage:latest
     ports:
       - 5454:5454
@@ -28,6 +24,11 @@ services:
       - METRICS_MAX_AGE_SECONDS=10
       - METRICS_AGE_BUCKETS=2
       - METRICS_ENABLE_SUMMARY=true
+      - TOKENSTORAGE_TELEMETRY_URL=http://telemetry:3000/v1/collect
+      - TOKENSTORAGE_TELEMETRY_DEBUG=true
+      - TOKENSTORAGE_TELEMETRY_DISABLED=false
+    depends_on:
+      - telemetry
 
   prometheus:
     mem_limit: 68m
@@ -51,7 +52,8 @@ services:
     ports:
       - "9091:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      # - grafana_data:/var/lib/grafana
+      - ./grafana.yaml:/etc/grafana/provisioning/datasources/tokensstorage-prometheus.yml
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
@@ -61,4 +63,4 @@ services:
 volumes:
   postgres_data:
   grafana_data:
-  prometheus_data: {}
+  prometheus_data:

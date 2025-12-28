@@ -1,0 +1,4 @@
+datasources:
+  - name: tokenstorage
+    type: prometheus
+    url: http://prometheus:9090
