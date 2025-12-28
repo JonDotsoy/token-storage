@@ -8,12 +8,12 @@ import { httpTransportProtocol } from "./utils/http-trasport-protocol.js";
 import type { StorageInstance } from "./token-storage/storage/dtos/storage-instance.dto.js";
 import { Client } from "pg";
 import { PostgresQLStorage } from "./token-storage/storage/postgresql-storage.js";
-// import { DuckDBStorage } from "./token-storage/storage/duckdb-storage.js";
 import { HTTPStorage } from "./token-storage/storage/http-storage.js";
 import * as Prometheus from "prom-client";
 import { Metrics } from "./utils/metrics.js";
 import { Telemetry } from "./utils/telemetry.js";
 import { packageVersion } from "./package-version.js";
+import { SQLiteStorage } from "./token-storage/storage/sqlite-storage.js";
 
 const config = Config.fromEnvironment();
 
@@ -81,23 +81,24 @@ const metricsMiddleware =
 
 const router = new Router();
 
-const dbFactory = (uri: string | null): StorageInstance | undefined => {
+const dbFactory = async (
+  uri: string | null,
+): Promise<StorageInstance | undefined> => {
   if (uri === null) return undefined;
   if (!URL.canParse(uri)) return undefined;
   const { protocol, pathname } = new URL(uri);
   if (protocol === "postgresql")
     return new PostgresQLStorage({ client: new Client(uri) });
-  // if (protocol === "duckdb")
-  //   return new DuckDBStorage({ database: { path: pathname } });
-  // if (protocol === "file")
-  //   return new DuckDBStorage({ database: { path: pathname } });
+  if (protocol === "sqlite" || protocol === "file") {
+    return new SQLiteStorage({ database: { path: pathname } });
+  }
   if (protocol === "http" || protocol === "https")
     return new HTTPStorage(new URL(uri));
   return undefined;
 };
 
 const tokenStorage = new TokenStorage({
-  db: dbFactory(config.database.uri),
+  db: await dbFactory(config.database.uri),
 });
 
 const transport = new TokenStorageHTTPTransport(tokenStorage, {
