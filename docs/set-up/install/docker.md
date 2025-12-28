@@ -38,6 +38,7 @@ TokenStorage puede configurarse mediante las siguientes variables de entorno:
 Datasources soportados:
 
 - **PostgreSQL**: `postgresql://user:password@host:port/database`
+- **SQLite**: `sqlite:///path/to/database.db` o `file:///path/to/database.db`
 - **HTTP Storage**: `http://host:port/path` o `https://host:port/path`
 - **Memory**: No especificar `DB_URI` (por defecto)
 
@@ -175,7 +176,22 @@ Esto iniciará:
 
 ## Persistencia de datos
 
-Para persistir datos, monta un volumen en el contenedor:
+### Usando SQLite (recomendado)
+
+Para persistir datos con SQLite, monta un volumen y configura la variable `DB_URI`:
+
+```bash
+docker run -d \
+  -p "5454:5454" \
+  -v ./data:/data \
+  -e "DB_URI=sqlite:///data/tokenstorage.db" \
+  --name tokenstorage \
+  jondotsoy/token-storage
+```
+
+### Usando volumen sin configuración
+
+También puedes montar un volumen sin especificar `DB_URI` (usará memoria por defecto):
 
 ```bash
 docker run -d \
