@@ -12,8 +12,26 @@ import { PostgresQLStorage } from "./token-storage/storage/postgresql-storage.js
 import { HTTPStorage } from "./token-storage/storage/http-storage.js";
 import * as Prometheus from "prom-client";
 import { Metrics } from "./utils/metrics.js";
+import { Telemetry } from "./utils/telemetry.js";
+import { packageVersion } from "./package-version.js";
 
 const config = Config.fromEnvironment();
+
+const telemetry = config.telemetry.enabled
+  ? new Telemetry({
+      uri: config.telemetry.uri,
+      debug: config.telemetry.debug,
+    })
+  : null;
+
+telemetry?.push({
+  name: "container_up",
+  client_id: `${Date.now()}.${1234}`,
+  properties: {
+    service_name: "tokenstorage",
+    service_version: packageVersion,
+  },
+});
 
 const metrics = new Metrics({
   enabled: config.server.metrics.enabled,

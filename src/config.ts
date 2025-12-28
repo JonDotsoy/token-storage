@@ -34,18 +34,27 @@ interface DatabaseConfig {
   uri: string | null;
 }
 
+interface TelemetryConfig {
+  enabled: boolean;
+  uri: string;
+  debug: boolean;
+}
+
 interface ConfigOptions {
   server?: Partial<Omit<ServerConfig, "metrics">> & {
     metrics?: Partial<MetricsConfig>;
   };
   cors?: Partial<CorsConfig>;
   database?: Partial<DatabaseConfig>;
+  telemetry?: Partial<TelemetryConfig>;
 }
 
 export class Config {
   public server: ServerConfig;
   public cors: CorsConfig;
   public database: DatabaseConfig;
+  public telemetry: TelemetryConfig;
+  public telemetryEnabled: boolean;
 
   constructor(options?: ConfigOptions) {
     const defaults = Config.defaultValues();
@@ -82,12 +91,19 @@ export class Config {
     this.database = {
       uri: options?.database?.uri ?? defaults.database.uri,
     };
+    this.telemetry = {
+      enabled: options?.telemetry?.enabled ?? defaults.telemetry.enabled,
+      uri: options?.telemetry?.uri ?? defaults.telemetry.uri,
+      debug: options?.telemetry?.debug ?? defaults.telemetry.debug,
+    };
+    this.telemetryEnabled = this.telemetry.enabled;
   }
 
   static defaultValues(): {
     server: ServerConfig;
     cors: CorsConfig;
     database: DatabaseConfig;
+    telemetry: TelemetryConfig;
   } {
     return {
       server: {
@@ -117,6 +133,11 @@ export class Config {
       database: {
         uri: null,
       },
+      telemetry: {
+        enabled: true,
+        uri: "https://telemetry.tokenstorage.dev/collect",
+        debug: false,
+      },
     };
   }
 
@@ -128,6 +149,26 @@ export class Config {
     const hostname = env("HOST")?.string()?.value ?? null;
     const corsOrigin = env("CORS_ORIGIN")?.string()?.value ?? null;
     const dbUri = env("DB_URI")?.string()?.value ?? null;
+    const telemetryUri =
+      env("TOKENSTORAGE_TELEMETRY_URL")?.string()?.value ?? null;
+    const telemetryDebug =
+      env("TOKENSTORAGE_TELEMETRY_DEBUG")
+        ?.string()
+        ?.pipe((v) => {
+          const normalized = v.toLowerCase();
+          return (
+            normalized === "on" || normalized === "true" || normalized === "1"
+          );
+        }).value ?? null;
+    const telemetryDisabled =
+      env("TOKENSTORAGE_TELEMETRY_DISABLED")
+        ?.string()
+        ?.pipe((v) => {
+          const normalized = v.toLowerCase();
+          return (
+            normalized === "on" || normalized === "true" || normalized === "1"
+          );
+        }).value ?? null;
     const metricsMaxAgeSeconds =
       env("METRICS_MAX_AGE_SECONDS")
         ?.numeric()
@@ -227,6 +268,20 @@ export class Config {
       },
       database: {
         uri: options?.database?.uri ?? dbUri ?? defaultValues.database.uri,
+      },
+      telemetry: {
+        enabled:
+          options?.telemetry?.enabled ??
+          (telemetryDisabled === true ? false : null) ??
+          defaultValues.telemetry.enabled,
+        uri:
+          options?.telemetry?.uri ??
+          telemetryUri ??
+          defaultValues.telemetry.uri,
+        debug:
+          options?.telemetry?.debug ??
+          telemetryDebug ??
+          defaultValues.telemetry.debug,
       },
     });
   }
