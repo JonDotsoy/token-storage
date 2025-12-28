@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.4 AS base
+FROM oven/bun:1.3.5 AS base
 
 WORKDIR /usr/src/app
 
@@ -31,12 +31,14 @@ FROM base AS build
 COPY --from=install /temp/dev /usr/src/app
 COPY src /usr/src/app/src
 
-RUN bun build --target bun /usr/src/app/src/serve.ts --outfile /usr/src/app/tokens-serve.ts
+RUN bun build --target bun --external @duckdb/node-api /usr/src/app/src/serve.ts --outfile /usr/src/app/tokens-serve.ts
 
 # RELEASE
-FROM oven/bun:1.3.4-alpine
+FROM oven/bun:1.3.5-alpine
 
 WORKDIR /usr/src/app
+
+RUN bun install --production @duckdb/node-api
 
 COPY --from=build /usr/src/app/tokens-serve.ts /usr/src/app/src/serve.ts
 COPY --from=build /usr/src/app/src/healthcheck.ts /usr/src/app/src/healthcheck.ts

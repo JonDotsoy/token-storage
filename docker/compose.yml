@@ -13,7 +13,7 @@ services:
       - 8080:3000
 
   app:
-    mem_limit: 68m
+    mem_limit: 512m
     build: ..
     image: jondotsoy/token-storage:latest
     ports:
